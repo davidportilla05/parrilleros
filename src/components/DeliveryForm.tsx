@@ -52,9 +52,12 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     if (!isFormValid()) return;
     
     setIsSubmitting(true);
-    setOrderSubmitted(true);
-    clearCart();
-    navigate('/');
+    
+    // Simulate order processing
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setOrderSubmitted(true);
+    }, 2000);
   };
 
   const handleFinish = () => {
@@ -126,10 +129,6 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
             >
               Finalizar
             </button>
-            
-            <p className="text-xs text-gray-500">
-              Serás redirigido automáticamente en unos segundos...
-            </p>
           </div>
         </div>
       </div>
@@ -183,7 +182,6 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
                   placeholder="Ingresa tu nombre completo"
-FAC
                 />
               </div>
 
