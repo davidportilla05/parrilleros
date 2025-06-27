@@ -52,18 +52,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     if (!isFormValid()) return;
     
     setIsSubmitting(true);
-    
-    // Simulate order processing
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setOrderSubmitted(true);
-      
-      // Auto redirect after showing success message
-      setTimeout(() => {
-        clearCart();
-        navigate('/');
-      }, 5000);
-    }, 2000);
+    setOrderSubmitted(true);
+    clearCart();
+    navigate('/');
   };
 
   const handleFinish = () => {
@@ -192,6 +183,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
                   placeholder="Ingresa tu nombre completo"
+FAC
                 />
               </div>
 
@@ -290,7 +282,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
               </div>
             </div>
 
-             {/* Submit Button */}
+            {/* Submit Button */}
             <button
               onClick={handleSubmit}
               disabled={!isFormValid() || isSubmitting}
