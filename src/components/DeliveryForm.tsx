@@ -44,7 +44,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
            formData.phone && 
            formData.cedula && 
            formData.email && 
-           formData.paymentMethod &&
+           formData.paymentMethod && 
            cart.length > 0;
   };
 
@@ -57,12 +57,28 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     setTimeout(() => {
       setIsSubmitting(false);
       setOrderSubmitted(true);
+
+      // Construct WhatsApp message
+      const cartDetails = cart
+        .map(item => `${item.name} x${item.quantity} - $${(item.price * item.quantity).toLocaleString()}`)
+        .join('\n');
+      const message = `Nuevo Pedido #${orderNumber.toString().padStart(3, '0')}\n\n` +
+                      `👤 Cliente: ${formData.name}\n` +
+                      `📍 Dirección: ${formData.address}, ${formData.neighborhood}\n` +
+                      `📱 Teléfono: ${formData.phone}\n` +
+                      `🪪 Cédula: ${formData.cedula}\n` +
+                      `📧 Correo: ${formData.email}\n` +
+                      `💳 Pago: ${formData.paymentMethod}\n` +
+                      `🛒 Productos:\n${cartDetails}\n` +
+                      `💰 Total: $${Math.round(total).toLocaleString()}`;
       
-      // Auto redirect after showing success message
-      setTimeout(() => {
-        clearCart();
-        navigate('/');
-      }, 5000);
+      // Encode message and create WhatsApp URL
+      const encodedMessage = encodeURIComponent(message);
+      const phoneNumber = '573001234567'; // Replace with your WhatsApp number (e.g., +573001234567)
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+      // Open WhatsApp in a new tab
+      window.open(whatsappUrl, '_blank');
     }, 2000);
   };
 
@@ -135,10 +151,6 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
             >
               Finalizar
             </button>
-            
-            <p className="text-xs text-gray-500">
-              Serás redirigido automáticamente en unos segundos...
-            </p>
           </div>
         </div>
       </div>
@@ -290,7 +302,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
               </div>
             </div>
 
- BO            {/* Submit Button */}
+            {/* Submit Button */}
             <button
               onClick={handleSubmit}
               disabled={!isFormValid() || isSubmitting}
