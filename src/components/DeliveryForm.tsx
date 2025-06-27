@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send } from 'lucide-react';
+import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck } from 'lucide-react';
 import { useOrder } from '../context/OrderContext';
 import OrderSummary from './OrderSummary';
 
@@ -10,7 +10,7 @@ interface DeliveryFormProps {
 
 const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   const navigate = useNavigate();
-  const { cart, total, clearCart } = useOrder();
+  const { cart, total, clearCart, orderNumber } = useOrder();
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -21,6 +21,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     paymentMethod: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
 
   const paymentMethods = [
     'Efectivo',
@@ -54,50 +55,95 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     
     // Simulate order processing
     setTimeout(() => {
-      // Generate order summary message
-      const orderItems = cart.map(item => {
-        const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
-        const customizationsText = item.customizations.length > 0 
-          ? ` (${item.customizations.map(c => c.name.replace('AD ', '')).join(', ')})`
-          : '';
-        const friesText = item.withFries ? ' + Papas' : '';
-        const specialText = item.specialInstructions ? ` - ${item.specialInstructions}` : '';
-        
-        return `${item.quantity}x ${item.menuItem.name}${friesText}${customizationsText}${specialText} - $${Math.round((basePrice + item.customizations.reduce((sum, c) => sum + c.price, 0)) * item.quantity).toLocaleString()}`;
-      }).join('\n');
-
-      const orderMessage = `
-🍔 NUEVO PEDIDO A DOMICILIO - PARRILLEROS FAST FOOD
-
-👤 DATOS DEL CLIENTE:
-▪️ Nombre: ${formData.name}
-▪️ Dirección: ${formData.address}, ${formData.neighborhood}
-▪️ Celular: ${formData.phone}
-▪️ Cédula: ${formData.cedula}
-▪️ Correo: ${formData.email}
-
-🛒 PEDIDO:
-${orderItems}
-
-💰 TOTAL: $${Math.round(total).toLocaleString()}
-💳 Forma de pago: ${formData.paymentMethod}
-
-🛵 Tiempo estimado: 45-60 minutos
-📅 Fecha: ${new Date().toLocaleDateString()}
-⏰ Hora: ${new Date().toLocaleTimeString()}
-
-¡Gracias por preferirnos!
-      `.trim();
-
-      // In a real app, this would send to WhatsApp API or backend
-      console.log('Order submitted:', orderMessage);
+      setIsSubmitting(false);
+      setOrderSubmitted(true);
       
-      // Show success and redirect
-      alert('¡Pedido enviado exitosamente! Te contactaremos pronto para confirmar tu domicilio.');
-      clearCart();
-      navigate('/');
+      // Auto redirect after showing success message
+      setTimeout(() => {
+        clearCart();
+        navigate('/');
+      }, 5000);
     }, 2000);
   };
+
+  const handleFinish = () => {
+    clearCart();
+    navigate('/');
+  };
+
+  // Success confirmation screen
+  if (orderSubmitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle size={48} className="text-green-600" />
+          </div>
+          
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            ¡Pedido Enviado Exitosamente! 🎉
+          </h1>
+          
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+            <p className="text-orange-800 font-semibold mb-2">
+              📞 Te contactaremos pronto
+            </p>
+            <p className="text-sm text-orange-700">
+              Nuestro equipo se comunicará contigo en los próximos minutos para confirmar tu pedido y coordinar la entrega.
+            </p>
+          </div>
+
+          <div className="space-y-3 mb-6 text-left">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">📋 Número de pedido:</span>
+              <span className="font-bold text-[#FF8C00]">#{orderNumber.toString().padStart(3, '0')}</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">👤 Cliente:</span>
+              <span className="font-medium">{formData.name}</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">📱 Teléfono:</span>
+              <span className="font-medium">{formData.phone}</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">💰 Total:</span>
+              <span className="font-bold text-[#FF8C00] text-lg">${Math.round(total).toLocaleString()}</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">💳 Pago:</span>
+              <span className="font-medium">{formData.paymentMethod}</span>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-center mb-2">
+              <Clock size={20} className="text-blue-600 mr-2" />
+              <span className="font-bold text-blue-800">Tiempo estimado</span>
+            </div>
+            <p className="text-2xl font-bold text-blue-600">45-60 minutos</p>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={handleFinish}
+              className="w-full py-3 bg-[#FF8C00] text-white font-bold rounded-lg hover:bg-orange-600 transition-colors shadow-lg"
+            >
+              Finalizar
+            </button>
+            
+            <p className="text-xs text-gray-500">
+              Serás redirigido automáticamente en unos segundos...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
@@ -112,7 +158,10 @@ ${orderItems}
               <ArrowLeft size={20} />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Pedido a Domicilio</h1>
+              <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+                <Truck size={28} className="mr-2 text-[#FF8C00]" />
+                Pedido a Domicilio
+              </h1>
               <p className="text-gray-600">Completa tus datos para procesar tu pedido</p>
             </div>
           </div>
