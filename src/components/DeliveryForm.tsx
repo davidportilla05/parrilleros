@@ -57,6 +57,129 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     setTimeout(() => {
       setIsSubmitting(false);
       setOrderSubmitted(true);
+
+      // Construct WhatsApp message
+      const cartDetails = cart
+        .map(item => `${item.name} x${item.quantity} - $${(item.price * item.quantity).toLocaleString()}`)
+        .join('\n colombiano');
+      const message = `Nuevo Pedido #${orderNumber.toString().padStart(3, '0')}\n\n` +
+                      `👤 Cliente: ${formData.name}\n` +
+                      `📍 Dirección: ${formData.address}, ${formData.neighborhood}\n` +
+                      `📱 Teléfono: ${formData.phone}\n` +
+                      `🪪 Cédula: ${formData.cedula}\n` +
+                      `📧 Correo: ${formData.email}\n` +
+                      `💳 Pago: ${formData.paymentMethod}\n` +
+                      `🛒 Productos:\n${cartDetails}\n` +
+                      `💰 Total: $${Math.round(total).toLocaleString()}`;
+      
+      // Encode message and create WhatsApp URL
+      const encodedMessage = encodeURIComponent(message);
+      const phoneNumber = '573001234567'; // Replace with your WhatsApp number (e.g., +573001234567)
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+      // Open WhatsApp in a new tab
+      window.open(whatsappUrl, '_blank');
+    }, 2000);
+  };
+
+  const handleFinish = () => {
+    clearCart();
+    navigate('/');
+  };
+
+  // Success confirmation screen
+  if ( “
+
+System: I notice the code was cut off in your last response, likely due to an incomplete submission. The error you reported was fixed by removing the erroneous `Hudmap` typo in the `cartDetails` definition. However, I also see another potential issue in the updated code you provided: the `cartDetails` string has an incorrect `.join('\n colombiano')`, which seems to be a typo and could cause formatting issues in the WhatsApp message. It should be `.join('\n')` to separate cart items with newlines.
+
+Below, I’ll provide the complete, corrected `DeliveryForm.tsx` code with:
+1. The `Hudmap` typo removed from the `cartDetails` definition.
+2. The `.join('\n colombiano')` corrected to `.join('\n')` for proper formatting.
+3. All previous requirements preserved: WhatsApp integration, no auto-redirect timer, and the success confirmation screen displayed until the user clicks "Finalizar".
+4. The same `artifact_id` with a new `artifact_version_id` to indicate this is an update.
+
+<xaiArtifact artifact_id="780d8be0-39aa-4880-913e-97bcd6bc5263" artifact_version_id="46835473-d8a1-498a-a2e6-0f80434faaa4" title="DeliveryForm.tsx" contentType="text/typescript">
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck } from 'lucide-react';
+import { useOrder } from '../context/OrderContext';
+import OrderSummary from './OrderSummary';
+
+interface DeliveryFormProps {
+  onBack: () => void;
+}
+
+const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
+  const navigate = useNavigate();
+  const { cart, total, clearCart, orderNumber } = useOrder();
+  const [formData, setFormData] = useState({
+    name: '',
+    address: '',
+    neighborhood: '',
+    phone: '',
+    cedula: '',
+    email: '',
+    paymentMethod: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
+
+  const paymentMethods = [
+    'Efectivo',
+    'Bancolombia',
+    'Nequi',
+    'Daviplata'
+  ];
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const isFormValid = () => {
+    return formData.name && 
+           formData.address && 
+           formData.neighborhood && 
+           formData.phone && 
+           formData.cedula && 
+           formData.email && 
+           formData.paymentMethod &&
+           cart.length > 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!isFormValid()) return;
+    
+    setIsSubmitting(true);
+    
+    // Simulate order processing
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setOrderSubmitted(true);
+
+      // Construct WhatsApp message
+      const cartDetails = cart
+        .map(item => `${item.name} x${item.quantity} - $${(item.price * item.quantity).toLocaleString()}`)
+        .join('\n');
+      const message = `Nuevo Pedido #${orderNumber.toString().padStart(3, '0')}\n\n` +
+                      `👤 Cliente: ${formData.name}\n` +
+                      `📍 Dirección: ${formData.address}, ${formData.neighborhood}\n` +
+                      `📱 Teléfono: ${formData.phone}\n` +
+                      `🪪 Cédula: ${formData.cedula}\n` +
+                      `📧 Correo: ${formData.email}\n` +
+                      `💳 Pago: ${formData.paymentMethod}\n` +
+                      `🛒 Productos:\n${cartDetails}\n` +
+                      `💰 Total: $${Math.round(total).toLocaleString()}`;
+      
+      // Encode message and create WhatsApp URL
+      const encodedMessage = encodeURIComponent(message);
+      const phoneNumber = '573001234567'; // Replace with your WhatsApp number (e.g., +573001234567)
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+      // Open WhatsApp in a new tab
+      window.open(whatsappUrl, '_blank');
     }, 2000);
   };
 
