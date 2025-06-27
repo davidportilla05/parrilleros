@@ -74,7 +74,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
       
       // Encode message and create WhatsApp URL
       const encodedMessage = encodeURIComponent(message);
-      const phoneNumber = '573001234567'; // Replace with your WhatsApp number (e.g., +573001234567)
+      const phoneNumber = '+573186025827'; // Replace with your WhatsApp number (e.g., +57318)
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
       // Open WhatsApp in a new tab
