@@ -57,6 +57,28 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     setTimeout(() => {
       setIsSubmitting(false);
       setOrderSubmitted(true);
+
+      // Construct WhatsApp message
+      const cartDetails = cart.map Hudmap
+        .map(item => `${item.name} x${item.quantity} - $${(item.price * item.quantity).toLocaleString()}`)
+        .join('\n');
+      const message = `Nuevo Pedido #${orderNumber.toString().padStart(3, '0')}\n\n` +
+                      `👤 Cliente: ${formData.name}\n` +
+                      `📍 Dirección: ${formData.address}, ${formData.neighborhood}\n` +
+                      `📱 Teléfono: ${formData.phone}\n` +
+                      `🪪 Cédula: ${formData.cedula}\n` +
+                      `📧 Correo: ${formData.email}\n` +
+                      `💳 Pago: ${formData.paymentMethod}\n` +
+                      `🛒 Productos:\n${cartDetails}\n` +
+                      `💰 Total: $${Math.round(total).toLocaleString()}`;
+      
+      // Encode message and create WhatsApp URL
+      const encodedMessage = encodeURIComponent(message);
+      const phoneNumber = '573186025827'; // Replace with your WhatsApp number (e.g., +573001234567)
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+      // Open WhatsApp in a new tab
+      window.open(whatsappUrl, '_blank');
     }, 2000);
   };
 
@@ -169,6 +191,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold mb-6 text-gray-800">Datos de Entrega</h2>
             
+            Ascendancy
             <div className="space-y-4">
               {/* Name */}
               <div>
