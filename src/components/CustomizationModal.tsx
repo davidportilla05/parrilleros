@@ -70,18 +70,18 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
     if (options.length === 0) return null;
     
     return (
-      <div className="mb-6">
-        <h4 className="font-bold text-lg mb-3 flex items-center text-gray-800">
-          <span className="mr-2 text-xl">{icon}</span>
+      <div className="mb-4">
+        <h4 className="font-bold text-base mb-2 flex items-center text-gray-800">
+          <span className="mr-2 text-lg">{icon}</span>
           {title}
         </h4>
         <div className="grid grid-cols-1 gap-2">
           {options.map((option) => (
             <label 
               key={option.id} 
-              className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all cursor-pointer hover:shadow-md ${
+              className={`flex items-center justify-between p-2.5 rounded-lg border-2 transition-all cursor-pointer hover:shadow-sm ${
                 selectedOptions.some(opt => opt.id === option.id)
-                  ? 'border-[#FF8C00] bg-orange-50 shadow-md'
+                  ? 'border-[#FF8C00] bg-orange-50 shadow-sm'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
@@ -90,14 +90,14 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
                   type="checkbox"
                   checked={selectedOptions.some(opt => opt.id === option.id)}
                   onChange={() => toggleOption(option)}
-                  className="w-5 h-5 accent-[#FF8C00] mr-3"
+                  className="w-4 h-4 accent-[#FF8C00] mr-3"
                 />
-                <span className="text-gray-800 font-medium">
+                <span className="text-gray-800 font-medium text-sm">
                   {option.name.replace('AD ', '')}
                 </span>
               </div>
               {option.price > 0 && (
-                <span className="font-bold text-[#FF8C00] text-lg">
+                <span className="font-bold text-[#FF8C00] text-sm">
                   +${option.price.toLocaleString()}
                 </span>
               )}
@@ -109,11 +109,11 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-xl w-full max-w-lg max-h-[95vh] flex flex-col mx-2 sm:mx-4">
         {/* Header with image */}
         <div className="relative flex-shrink-0">
-          <div className="h-40 relative">
+          <div className="h-32 sm:h-40 relative">
             <img 
               src={menuItem.image} 
               alt={menuItem.name} 
@@ -122,27 +122,27 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <button 
               onClick={onClose}
-              className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
+              className="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow-lg hover:bg-gray-100 transition-colors"
             >
-              <X size={20} className="text-gray-800" />
+              <X size={18} className="text-gray-800" />
             </button>
             
             {/* Title overlay */}
-            <div className="absolute bottom-4 left-4 right-4">
-              <h2 className="text-2xl font-bold text-white mb-1">{menuItem.name}</h2>
-              <p className="text-white/90 text-sm">{menuItem.description}</p>
+            <div className="absolute bottom-2 left-2 right-2">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-1 line-clamp-1">{menuItem.name}</h2>
+              <p className="text-white/90 text-xs sm:text-sm line-clamp-2">{menuItem.description}</p>
             </div>
           </div>
         </div>
         
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
           {/* Fries option - prominent placement */}
           {menuItem.priceWithFries && (
-            <div className="mb-6">
-              <label className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer hover:shadow-md ${
+            <div className="mb-4">
+              <label className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all cursor-pointer hover:shadow-sm ${
                 withFries
-                  ? 'border-[#FF8C00] bg-orange-50 shadow-md'
+                  ? 'border-[#FF8C00] bg-orange-50 shadow-sm'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}>
                 <div className="flex items-center">
@@ -150,14 +150,14 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
                     type="checkbox"
                     checked={withFries}
                     onChange={() => setWithFries(!withFries)}
-                    className="w-6 h-6 accent-[#FF8C00] mr-4"
+                    className="w-5 h-5 accent-[#FF8C00] mr-3"
                   />
                   <div>
-                    <span className="text-lg font-bold text-gray-800">🍟 Agregar Papas</span>
-                    <p className="text-sm text-gray-600">Papas francesas crujientes</p>
+                    <span className="text-base font-bold text-gray-800">🍟 Agregar Papas</span>
+                    <p className="text-xs text-gray-600">Papas francesas crujientes</p>
                   </div>
                 </div>
-                <span className="font-bold text-[#FF8C00] text-xl">
+                <span className="font-bold text-[#FF8C00] text-base">
                   +${((menuItem.priceWithFries || menuItem.price) - menuItem.price).toLocaleString()}
                 </span>
               </label>
@@ -165,7 +165,7 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
           )}
 
           {/* Organized customization options */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <OptionGroup title="Proteínas" options={proteinOptions} icon="🥩" />
             <OptionGroup title="Quesos" options={cheeseOptions} icon="🧀" />
             <OptionGroup title="Vegetales y Extras" options={vegetableOptions} icon="🥬" />
@@ -173,46 +173,46 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
           </div>
           
           {/* Special instructions */}
-          <div className="mt-6">
-            <h4 className="font-bold text-lg mb-3 flex items-center text-gray-800">
-              <span className="mr-2 text-xl">📝</span>
+          <div className="mt-4">
+            <h4 className="font-bold text-base mb-2 flex items-center text-gray-800">
+              <span className="mr-2 text-lg">📝</span>
               Instrucciones especiales
             </h4>
             <textarea
               value={specialInstructions}
               onChange={(e) => setSpecialInstructions(e.target.value)}
               placeholder="Ej: Sin cebolla, salsa aparte..."
-              className="w-full p-3 border-2 border-gray-200 rounded-lg resize-none h-20 focus:ring-2 focus:ring-[#FF8C00] focus:border-[#FF8C00] transition-colors"
+              className="w-full p-2.5 border-2 border-gray-200 rounded-lg resize-none h-16 focus:ring-2 focus:ring-[#FF8C00] focus:border-[#FF8C00] transition-colors text-sm"
             />
           </div>
         </div>
         
         {/* Fixed bottom section */}
-        <div className="flex-shrink-0 p-6 bg-gray-50 rounded-b-xl border-t">
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex-shrink-0 p-3 sm:p-4 bg-gray-50 rounded-b-xl border-t">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center bg-white rounded-lg border-2 border-gray-200">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-12 h-12 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-l-lg transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-l-lg transition-colors"
               >
-                <Minus size={20} />
+                <Minus size={16} />
               </button>
-              <span className="w-16 text-center font-bold text-lg">{quantity}</span>
+              <span className="w-12 text-center font-bold text-base">{quantity}</span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className="w-12 h-12 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-r-lg transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-r-lg transition-colors"
               >
-                <Plus size={20} />
+                <Plus size={16} />
               </button>
             </div>
-            <div className="text-2xl font-bold text-[#FF8C00]">
+            <div className="text-xl font-bold text-[#FF8C00]">
               ${Math.round(totalPrice).toLocaleString()}
             </div>
           </div>
           
           <button
             onClick={handleAddToCart}
-            className="w-full py-4 bg-[#FF8C00] text-white font-bold rounded-lg hover:bg-orange-600 transition-colors text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+            className="w-full py-3 bg-[#FF8C00] text-white font-bold rounded-lg hover:bg-orange-600 transition-colors text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
           >
             Añadir al carrito
           </button>
