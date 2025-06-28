@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, ArrowLeft } from 'lucide-react'; // Añade ArrowLeft aquí
 import Layout from '../components/Layout';
 import CategorySelector from '../components/CategorySelector';
 import MenuCard from '../components/MenuCard';
@@ -79,6 +79,17 @@ const MenuPage: React.FC = () => {
   return (
     <Layout title="Menú" showCart={false}>
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Botón de regreso */}
+        <div className="max-w-4xl mx-auto mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center text-[#FF8C00] hover:text-orange-600 font-semibold mb-2"
+          >
+            <ArrowLeft className="mr-2" />
+            Volver al inicio
+          </button>
+        </div>
+
         {/* Search Bar */}
         <div className="max-w-4xl mx-auto mb-8">
           <SearchBar 
