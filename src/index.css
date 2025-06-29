@@ -60,6 +60,69 @@
   text-transform: uppercase;
 }
 
+/* GSAP Animation Classes */
+.gsap-fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.gsap-scale-in {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.gsap-slide-in-left {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+.gsap-slide-in-right {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+.gsap-rotate-in {
+  opacity: 0;
+  transform: rotate(-180deg) scale(0.5);
+}
+
+/* Menu Card Hover Effects with GSAP */
+.menu-card-container {
+  perspective: 1000px;
+}
+
+.menu-card-container:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease;
+}
+
+/* Custom animations for enhanced UX */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 140, 0, 0.6);
+  }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+.pulse-glow-animation {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 /* Driver.js Custom Styles for Kiosk */
 .kiosk-tour-popover {
   background: white !important;
@@ -228,4 +291,17 @@
     padding: 6px 12px !important;
     font-size: 0.75rem !important;
   }
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Performance optimizations for animations */
+.menu-card-container,
+.gsap-animated {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
