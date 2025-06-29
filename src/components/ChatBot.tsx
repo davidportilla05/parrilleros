@@ -36,6 +36,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
   const [isListening, setIsListening] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { addToCart, cart } = useOrder();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -45,6 +46,18 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
   // Get active conversation
   const activeConversation = conversations.find(conv => conv.id === activeConversationId);
   const messages = activeConversation?.messages || [];
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Initialize speech recognition and synthesis
   useEffect(() => {
@@ -113,6 +126,19 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
       createNewConversation();
     }
   }, [isOpen]);
+
+  // Prevent body scroll when chat is open on mobile
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobile, isOpen]);
 
   const speak = (text: string) => {
     if (synthRef.current && 'speechSynthesis' in window) {
@@ -454,31 +480,60 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
     }
   };
 
+  // Responsive dimensions and positioning
+  const chatDimensions = isMobile 
+    ? {
+        position: 'fixed inset-0',
+        width: 'w-full',
+        height: 'h-full',
+        borderRadius: 'rounded-none',
+        bottom: 'bottom-0',
+        right: 'right-0',
+        margin: 'm-0'
+      }
+    : {
+        position: 'fixed',
+        width: 'w-80 sm:w-96',
+        height: 'h-[500px] sm:h-[600px]',
+        borderRadius: 'rounded-2xl',
+        bottom: 'bottom-20 sm:bottom-24',
+        right: 'right-2 sm:right-6',
+        margin: 'm-0'
+      };
+
+  const buttonSize = isMobile 
+    ? 'w-16 h-16 sm:w-14 sm:h-14'
+    : 'w-14 h-14';
+
+  const buttonPosition = isMobile
+    ? 'bottom-4 right-4 sm:bottom-6 sm:right-6'
+    : 'bottom-6 right-6';
+
   return (
     <>
       {/* Chat Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className={`fixed ${buttonPosition} z-50`}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`relative flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${
+          className={`relative flex items-center justify-center ${buttonSize} rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${
             isOpen 
               ? 'bg-red-500 hover:bg-red-600' 
               : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
           }`}
         >
           {isOpen ? (
-            <X size={24} className="text-white" />
+            <X size={isMobile ? 28 : 24} className="text-white" />
           ) : (
             <>
-              <MessageCircle size={24} className="text-white" />
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
-                <Sparkles size={12} className="text-white" />
+              <MessageCircle size={isMobile ? 28 : 24} className="text-white" />
+              <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
+                <Sparkles size={isMobile ? 10 : 12} className="text-white" />
               </div>
             </>
           )}
           
           {cartItemCount > 0 && !isOpen && (
-            <div className="absolute -top-2 -left-2 w-6 h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
+            <div className="absolute -top-2 -left-2 w-5 h-5 sm:w-6 sm:h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
               <span className="text-white text-xs font-bold">{cartItemCount}</span>
             </div>
           )}
@@ -487,41 +542,41 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-[500px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col border border-gray-200 overflow-hidden">
+        <div className={`${chatDimensions.position} ${chatDimensions.bottom} ${chatDimensions.right} ${chatDimensions.width} ${chatDimensions.height} ${chatDimensions.borderRadius} ${chatDimensions.margin} bg-white shadow-2xl z-50 flex flex-col border border-gray-200 overflow-hidden`}>
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 sm:p-4 text-white flex-shrink-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                  <Sparkles size={20} />
+              <div className="flex items-center min-w-0 flex-1">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                  <Sparkles size={isMobile ? 16 : 20} />
                 </div>
-                <div>
-                  <h3 className="font-bold">Asistente Parrilleros</h3>
-                  <p className="text-sm opacity-90">Tu ayudante para pedidos rápidos</p>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold text-sm sm:text-base truncate">Asistente Parrilleros</h3>
+                  <p className="text-xs sm:text-sm opacity-90 truncate">Tu ayudante para pedidos rápidos</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-2">
                 {/* Conversations Button */}
                 <button
                   onClick={() => setShowConversationList(!showConversationList)}
-                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-1.5 sm:p-2 hover:bg-white/20 rounded-full transition-colors"
                   title="Ver conversaciones"
                 >
-                  <MessageSquare size={18} />
+                  <MessageSquare size={isMobile ? 16 : 18} />
                 </button>
                 {/* New Conversation Button */}
                 <button
                   onClick={createNewConversation}
-                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-1.5 sm:p-2 hover:bg-white/20 rounded-full transition-colors"
                   title="Nueva conversación"
                 >
-                  <Plus size={18} />
+                  <Plus size={isMobile ? 16 : 18} />
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-1 sm:p-1 hover:bg-white/20 rounded-full transition-colors"
                 >
-                  <X size={20} />
+                  <X size={isMobile ? 18 : 20} />
                 </button>
               </div>
             </div>
@@ -529,14 +584,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
 
           {/* Conversation List */}
           {showConversationList ? (
-            <div className="flex-1 overflow-y-auto p-4">
-              <div className="mb-4">
-                <h4 className="font-bold text-gray-800 mb-2">Conversaciones</h4>
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+              <div className="mb-3 sm:mb-4">
+                <h4 className="font-bold text-gray-800 mb-2 text-sm sm:text-base">Conversaciones</h4>
                 <button
                   onClick={createNewConversation}
-                  className="w-full p-3 bg-blue-50 hover:bg-blue-100 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium transition-colors flex items-center justify-center"
+                  className="w-full p-2 sm:p-3 bg-blue-50 hover:bg-blue-100 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium transition-colors flex items-center justify-center text-sm sm:text-base"
                 >
-                  <Plus size={16} className="mr-2" />
+                  <Plus size={14} className="mr-1 sm:mr-2" />
                   Nueva conversación
                 </button>
               </div>
@@ -545,7 +600,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                 {conversations.map((conversation) => (
                   <div
                     key={conversation.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${
+                    className={`p-2 sm:p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${
                       activeConversationId === conversation.id
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
@@ -556,13 +611,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                         className="flex-1 min-w-0"
                         onClick={() => switchConversation(conversation.id)}
                       >
-                        <h5 className="font-medium text-gray-800 truncate">
+                        <h5 className="font-medium text-gray-800 truncate text-sm sm:text-base">
                           {conversation.title}
                         </h5>
                         <div className="flex items-center text-xs text-gray-500 mt-1">
-                          <Clock size={12} className="mr-1" />
+                          <Clock size={10} className="mr-1" />
                           <span>{formatDate(conversation.lastActivity)} {formatTime(conversation.lastActivity)}</span>
-                          <span className="mx-2">•</span>
+                          <span className="mx-1 sm:mx-2">•</span>
                           <span>{conversation.messages.length} mensajes</span>
                         </div>
                       </div>
@@ -571,10 +626,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                           e.stopPropagation();
                           deleteConversation(conversation.id);
                         }}
-                        className="ml-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                        className="ml-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-shrink-0"
                         title="Eliminar conversación"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
@@ -584,24 +639,24 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
           ) : (
             <>
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 chatbot-messages">
+              <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 chatbot-messages">
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] p-3 rounded-2xl chatbot-message-animation ${
+                    <div className={`max-w-[85%] sm:max-w-[80%] p-2 sm:p-3 rounded-2xl chatbot-message-animation ${
                       message.type === 'user' 
                         ? 'bg-blue-500 text-white' 
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      <p className="text-sm whitespace-pre-line">{message.content}</p>
+                      <p className="text-xs sm:text-sm whitespace-pre-line">{message.content}</p>
                       
                       {/* Suggestions */}
                       {message.suggestions && (
-                        <div className="mt-3 space-y-2">
+                        <div className="mt-2 sm:mt-3 space-y-1 sm:space-y-2">
                           {message.suggestions.map((suggestion, index) => (
                             <button
                               key={index}
                               onClick={() => handleSuggestionClick(suggestion)}
-                              className="block w-full text-left p-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs transition-colors chatbot-button"
+                              className="block w-full text-left p-1.5 sm:p-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs transition-colors chatbot-button"
                             >
                               {suggestion}
                             </button>
@@ -611,19 +666,19 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                       
                       {/* Products */}
                       {message.products && (
-                        <div className="mt-3 space-y-2">
+                        <div className="mt-2 sm:mt-3 space-y-1 sm:space-y-2">
                           {message.products.map((product) => (
-                            <div key={product.id} className="bg-white rounded-lg p-3 border chatbot-product-card">
+                            <div key={product.id} className="bg-white rounded-lg p-2 sm:p-3 border chatbot-product-card">
                               <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  <h4 className="font-medium text-gray-800 text-sm">{product.name}</h4>
-                                  <p className="text-[#FF8C00] font-bold text-sm">${product.price.toLocaleString()}</p>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-gray-800 text-xs sm:text-sm truncate">{product.name}</h4>
+                                  <p className="text-[#FF8C00] font-bold text-xs sm:text-sm">${product.price.toLocaleString()}</p>
                                 </div>
                                 <button
                                   onClick={() => handleProductSelect(product)}
-                                  className="ml-2 p-2 bg-[#FF8C00] text-white rounded-full hover:bg-orange-600 transition-colors chatbot-button"
+                                  className="ml-2 p-1.5 sm:p-2 bg-[#FF8C00] text-white rounded-full hover:bg-orange-600 transition-colors chatbot-button flex-shrink-0"
                                 >
-                                  <ShoppingCart size={14} />
+                                  <ShoppingCart size={12} />
                                 </button>
                               </div>
                             </div>
@@ -637,11 +692,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                 {/* Typing indicator */}
                 {isTyping && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 p-3 rounded-2xl chatbot-typing-indicator">
+                    <div className="bg-gray-100 p-2 sm:p-3 rounded-2xl chatbot-typing-indicator">
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
                     </div>
                   </div>
@@ -651,7 +706,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
               </div>
 
               {/* Input */}
-              <div className="p-4 border-t border-gray-200">
+              <div className="p-3 sm:p-4 border-t border-gray-200 flex-shrink-0">
                 <div className="flex items-center space-x-2">
                   <div className="flex-1 relative">
                     <input
@@ -660,20 +715,20 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Escribe tu pedido o pregunta..."
-                      className="w-full p-3 pr-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-full p-2 sm:p-3 pr-10 sm:pr-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
                     />
                     
                     {/* Voice input button */}
                     {speechSupported && (
                       <button
                         onClick={isListening ? stopListening : startListening}
-                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full transition-colors ${
+                        className={`absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full transition-colors ${
                           isListening 
                             ? 'bg-red-500 text-white animate-pulse chatbot-voice-recording' 
                             : 'text-gray-400 hover:text-gray-600'
                         }`}
                       >
-                        {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                        {isListening ? <MicOff size={14} /> : <Mic size={14} />}
                       </button>
                     )}
                   </div>
@@ -681,37 +736,37 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                   <button
                     onClick={handleSendMessage}
                     disabled={!inputValue.trim()}
-                    className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors chatbot-button"
+                    className="p-2 sm:p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors chatbot-button flex-shrink-0"
                   >
-                    <Send size={16} />
+                    <Send size={14} />
                   </button>
                 </div>
                 
                 {/* Quick actions */}
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="flex flex-wrap gap-1 sm:gap-2 mt-2 sm:mt-3">
                   <button
                     onClick={() => handleSuggestionClick("Ver hamburguesas")}
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
+                    className="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
                   >
-                    🍔 Hamburguesas
+                    🍔 <span className="hidden sm:inline">Hamburguesas</span>
                   </button>
                   <button
                     onClick={() => handleSuggestionClick("Ver bebidas")}
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
+                    className="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
                   >
-                    🥤 Bebidas
+                    🥤 <span className="hidden sm:inline">Bebidas</span>
                   </button>
                   <button
                     onClick={() => handleSuggestionClick("Ver mi carrito")}
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
+                    className="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
                   >
-                    🛒 Mi carrito {cartItemCount > 0 && `(${cartItemCount})`}
+                    🛒 <span className="hidden sm:inline">Mi carrito</span> {cartItemCount > 0 && `(${cartItemCount})`}
                   </button>
                   <button
                     onClick={() => handleSuggestionClick("Pedir a domicilio")}
-                    className="px-3 py-1 bg-[#FF8C00] hover:bg-orange-600 text-white rounded-full text-xs transition-colors chatbot-button"
+                    className="px-2 sm:px-3 py-1 bg-[#FF8C00] hover:bg-orange-600 text-white rounded-full text-xs transition-colors chatbot-button"
                   >
-                    🛵 Domicilio
+                    🛵 <span className="hidden sm:inline">Domicilio</span>
                   </button>
                 </div>
               </div>

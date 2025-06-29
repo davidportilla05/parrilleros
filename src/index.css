@@ -272,7 +272,7 @@
   background: rgba(37, 99, 235, 0.95) !important;
 }
 
-/* ChatBot Styles */
+/* ChatBot Responsive Styles */
 .chatbot-message-animation {
   animation: slideInUp 0.3s ease-out;
 }
@@ -327,41 +327,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive tour adjustments */
-@media (max-width: 768px) {
-  .kiosk-tour-popover {
-    max-width: 90vw !important;
-    margin: 10px !important;
-  }
-  
-  .kiosk-tour-popover .driver-popover-title {
-    font-size: 1.125rem !important;
-  }
-  
-  .kiosk-tour-popover .driver-popover-description {
-    font-size: 0.875rem !important;
-  }
-  
-  .kiosk-tour-popover .driver-popover-btn {
-    padding: 6px 12px !important;
-    font-size: 0.75rem !important;
-  }
-}
-
-/* Smooth scrolling for better UX */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Performance optimizations for animations */
-.menu-card-container,
-.gsap-animated,
-.chatbot-message-animation {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
-}
-
 /* Custom scrollbar for chat messages */
 .chatbot-messages::-webkit-scrollbar {
   width: 4px;
@@ -379,4 +344,114 @@ html {
 
 .chatbot-messages::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* Responsive ChatBot Styles */
+@media (max-width: 767px) {
+  /* Mobile-specific chatbot styles */
+  .chatbot-messages {
+    /* Optimize scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  .chatbot-input {
+    font-size: 16px !important;
+  }
+  
+  /* Better touch targets on mobile */
+  .chatbot-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Optimize animations for mobile performance */
+  .chatbot-message-animation {
+    animation-duration: 0.2s;
+  }
+  
+  /* Reduce motion for better mobile performance */
+  @media (prefers-reduced-motion: reduce) {
+    .chatbot-message-animation,
+    .chatbot-typing-indicator,
+    .chatbot-voice-recording {
+      animation: none;
+    }
+    
+    .chatbot-button:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+/* Tablet-specific styles */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Tablet optimizations */
+  .chatbot-messages {
+    padding: 1rem;
+  }
+}
+
+/* Desktop-specific styles */
+@media (min-width: 1024px) {
+  /* Desktop optimizations */
+  .chatbot-button:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Optimize for retina displays */
+  .chatbot-button {
+    border: 0.5px solid transparent;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  /* Adjust chat height for landscape mobile */
+  .chatbot-landscape-adjust {
+    height: 90vh !important;
+  }
+}
+
+/* Safe area adjustments for mobile devices with notches */
+@supports (padding: max(0px)) {
+  @media (max-width: 767px) {
+    .chatbot-mobile-safe {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
+  }
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Performance optimizations for animations */
+.menu-card-container,
+.gsap-animated,
+.chatbot-message-animation {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+/* Focus styles for accessibility */
+.chatbot-button:focus,
+input:focus,
+button:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Dark mode support (if needed in the future) */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode styles can be added here */
 }
