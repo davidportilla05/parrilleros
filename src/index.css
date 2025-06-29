@@ -2,25 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* HEAVYRUST Font Import */
-@font-face {
-  font-family: 'HEAVYRUST';
-  src: url('/fonts/HEAVYRUST.woff2') format('woff2'),
-       url('/fonts/HEAVYRUST.woff') format('woff'),
-       url('/fonts/HEAVYRUST.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Custom class for Parrilleros brand text */
-.parrilleros-brand {
-  font-family: 'HEAVYRUST', 'Arial Black', sans-serif !important;
-  font-weight: normal !important;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
 /* Driver.js Custom Styles for Kiosk */
 .kiosk-tour-popover {
   background: white !important;

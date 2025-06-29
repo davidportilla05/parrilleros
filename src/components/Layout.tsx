@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({
                 />
                 <Beef size={32} className="text-[#FF8C00] hidden" />
               </div>
-              <h1 className="text-2xl font-bold parrilleros-brand">Parrilleros</h1>
+              <h1 className="text-2xl font-bold">Parrilleros</h1>
             </div>
           </div>
           
@@ -84,7 +84,7 @@ const Layout: React.FC<LayoutProps> = ({
 
       {/* Footer */}
       <footer className="bg-[#1A1A1A] text-white p-4 text-center">
-        <p className="text-sm">&copy; 2025 <span className="parrilleros-brand">Parrilleros</span> Fast Food</p>
+        <p className="text-sm">&copy; 2025 Parrilleros Fast Food</p>
       </footer>
     </div>
   );

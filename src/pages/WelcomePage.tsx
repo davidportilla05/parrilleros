@@ -70,7 +70,7 @@ const WelcomePage: React.FC = () => {
             />
             <Beef size={80} className="text-white hidden" />
           </div>
-          <h1 className="text-5xl font-extrabold text-white mb-2 parrilleros-brand">PARRILLEROS</h1>
+          <h1 className="text-5xl font-extrabold text-white mb-2">PARRILLEROS</h1>
           <p className="text-2xl text-[#FF8C00] font-bold">FAST FOOD</p>
         </div>
         
