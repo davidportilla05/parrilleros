@@ -55,8 +55,20 @@ const WelcomePage: React.FC = () => {
       {/* Logo and Content */}
       <div className={`transform transition-all duration-1000 ease-out ${isAnimating ? 'translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}`}>
         <div className="mb-8 animate-pulse">
-          <div className="inline-flex items-center justify-center w-32 h-32 bg-[#FF8C00] rounded-full mb-6">
-            <Beef size={80} className="text-white" />
+          <div className="inline-flex items-center justify-center w-32 h-32 bg-[#FF8C00] rounded-full mb-6 p-4">
+            <img 
+              src="/public/image.png" 
+              alt="Parrilleros Logo" 
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                // Fallback to Beef icon if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'block';
+              }}
+            />
+            <Beef size={80} className="text-white hidden" />
           </div>
           <h1 className="text-5xl font-extrabold text-white mb-2">PARRILLEROS</h1>
           <p className="text-2xl text-[#FF8C00] font-bold">FAST FOOD</p>
