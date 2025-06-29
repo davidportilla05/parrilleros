@@ -71,19 +71,15 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
       if (item.withFries) {
         itemText += ' + Papas';
       }
-      itemText += `\n   • Cantidad: ${item.quantity}`;
-      itemText += `\n   • Precio unitario: $${basePrice.toLocaleString()}`;
+      itemText += ` x${item.quantity} - $${Math.round(itemSubtotal).toLocaleString()}`;
       
       if (item.customizations.length > 0) {
-        itemText += `\n   • Personalizaciones: ${item.customizations.map(c => c.name.replace('AD ', '')).join(', ')}`;
-        itemText += `\n   • Costo personalizaciones: $${customizationsTotal.toLocaleString()}`;
+        itemText += `\n   + ${item.customizations.map(c => c.name.replace('AD ', '')).join(', ')}`;
       }
       
       if (item.specialInstructions) {
-        itemText += `\n   • Instrucciones: ${item.specialInstructions}`;
+        itemText += `\n   * ${item.specialInstructions}`;
       }
-      
-      itemText += `\n   • Subtotal: $${Math.round(itemSubtotal).toLocaleString()}`;
       
       return itemText;
     }).join('\n\n');
@@ -91,39 +87,24 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     return `🍔 NUEVO PEDIDO DOMICILIO - PARRILLEROS
 ═══════════════════════════════════════
 
-📋 INFORMACIÓN DEL PEDIDO
-* Número de orden: #${orderNumber.toString().padStart(3, '0')}
-* Fecha y hora: ${new Date().toLocaleDateString()}, ${new Date().toLocaleTimeString()}
-* Total: $${Math.round(total).toLocaleString()}
+📋 PEDIDO #${orderNumber.toString().padStart(3, '0')} | ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
 
-👤 INFORMACIÓN DEL CLIENTE
-* Nombre: ${formData.name}
-* Cédula: ${formData.cedula}
-* Teléfono: ${formData.phone}
-* Email: ${formData.email}
+👤 CLIENTE
+${formData.name} | CC: ${formData.cedula}
+📱 ${formData.phone} | 📧 ${formData.email}
 
-📍 DIRECCIÓN DE ENTREGA
-* Dirección: ${formData.address}
-* Barrio: ${formData.neighborhood}
+📍 ENTREGA
+${formData.address}, ${formData.neighborhood}
 
-💳 FORMA DE PAGO
-* ${formData.paymentMethod}
-
-🛒 DETALLE DEL PEDIDO
+🛒 PRODUCTOS
 ${cartDetails}
 
-💰 RESUMEN DE COSTOS
-* Subtotal: $${Math.round(subtotal).toLocaleString()}
-* IVA (8%): $${Math.round(iva).toLocaleString()}
-* TOTAL: $${Math.round(total).toLocaleString()}
+💰 TOTAL: $${Math.round(total).toLocaleString()} (${formData.paymentMethod})
+⏰ Tiempo: 45-60 min
 
-⏰ TIEMPO ESTIMADO: 45-60 minutos
+¡PROCESAR INMEDIATAMENTE!
 
-¡Procesar inmediatamente!
-
-📍 SEDE RESPONSABLE: ${selectedLocation?.name}
-📞 Teléfono sede: ${selectedLocation?.phone}
-🏠 Dirección sede: ${selectedLocation?.address}`;
+📍 ${selectedLocation?.name} | ${selectedLocation?.phone}`;
   };
 
   const handleDownloadTicket = () => {
