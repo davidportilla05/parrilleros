@@ -250,26 +250,36 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
                     />
                   </div>
 
-                  {/* Neighborhood */}
+                  {/* Neighborhood - Changed to input field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Barrio *
                     </label>
-                    <select
+                    <input
+                      type="text"
                       value={formData.neighborhood}
                       onChange={(e) => handleInputChange('neighborhood', e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
-                    >
-                      <option value="">Selecciona tu barrio</option>
-                      {selectedLocation.deliveryZones.map((zone) => (
-                        <option key={zone} value={zone}>
-                          {zone}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Solo entregamos en las zonas mostradas para la sede seleccionada
-                    </p>
+                      placeholder="Escribe el nombre de tu barrio"
+                    />
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-xs text-blue-800 font-medium mb-1">
+                        📍 Zonas de entrega para {selectedLocation.name}:
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedLocation.deliveryZones.map((zone, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs"
+                          >
+                            {zone}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-xs text-blue-600 mt-2">
+                        Si tu barrio no está en la lista, escríbelo y confirmaremos la disponibilidad del servicio.
+                      </p>
+                    </div>
                   </div>
 
                   {/* Phone */}
@@ -361,7 +371,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
                       <Send size={20} className="mr-2" />
                       Enviar Pedido a Domicilio
                     </>
-                  )}
+                    )}
                 </button>
               </div>
             )}
