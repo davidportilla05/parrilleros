@@ -3,7 +3,7 @@ import { Location } from '../types';
 export const locations: Location[] = [
   {
     id: 'sede-tamasagra',
-    name: 'Parrilleros Centro',
+    name: 'Parrilleros Fast Food',
     address: 'Calle 18 #25-45, Centro',
     phone: '(602) 555-0101',
     whatsapp: '+573186025827',
@@ -18,7 +18,7 @@ export const locations: Location[] = [
   },
   {
     id: 'sede-san ignacio',
-    name: 'Parrilleros Norte',
+    name: 'Parrilleros Fast Food',
     address: 'Carrera 15 #45-20, Versalles',
     phone: '(602) 555-0102',
     whatsapp: '+573148300987',
@@ -33,7 +33,7 @@ export const locations: Location[] = [
   },
   {
     id: 'sede-las cuadras',
-    name: 'Parrilleros Sur',
+    name: 'Parrilleros Fast Food',
     address: 'Calle 5 #30-15, Fatima',
     phone: '(602) 555-0103',
     whatsapp: '+573186025829',
