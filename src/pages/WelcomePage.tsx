@@ -63,25 +63,9 @@ const WelcomePage: React.FC = () => {
         </div>
         
         <div className={`transition-all duration-700 delay-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
-          <p className="text-white text-xl mb-8 max-w-md mx-auto">
+          <p className="text-white text-xl mb-12 max-w-md mx-auto">
             Bienvenido a tu experiencia de autoservicio. Toque la pantalla para comenzar su pedido.
           </p>
-          
-          {/* Tour Button - Inline version - MUCHO MÁS GRANDE */}
-          {showTourButton && (
-            <div className="mb-8">
-              <TourButton 
-                onStartTour={handleStartTour}
-                variant="inline"
-                size="xl"
-                className="mb-6 pointer-events-auto transform hover:scale-110 transition-all duration-300"
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  handleStartTour();
-                }}
-              />
-            </div>
-          )}
           
           <div className="inline-flex items-center bg-[#FF8C00] text-white px-8 py-4 rounded-full text-xl font-bold hover:bg-orange-600 transition-colors cursor-pointer animate-bounce">
             Toque para comenzar
@@ -90,13 +74,13 @@ const WelcomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Tour Button - También más grande */}
+      {/* Tour Button - Pequeño y discreto en esquina superior derecha */}
       {showTourButton && (
         <TourButton 
           onStartTour={handleStartTour}
           variant="floating"
-          size="xl"
-          className="pointer-events-auto"
+          size="sm"
+          className="top-6 right-6 pointer-events-auto"
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             handleStartTour();

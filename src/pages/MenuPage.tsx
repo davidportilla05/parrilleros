@@ -218,13 +218,13 @@ const MenuPage: React.FC = () => {
           </div>
         )}
 
-        {/* Tour Button */}
+        {/* Tour Button - Pequeño en esquina superior derecha */}
         {showTourButton && (
           <TourButton 
             onStartTour={handleStartTour}
             variant="floating"
-            size="md"
-            className="bottom-8 left-8"
+            size="sm"
+            className="top-6 right-6"
           />
         )}
       </div>
