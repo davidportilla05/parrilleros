@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { useDriverTour, welcomeTourSteps } from '../hooks/useDriverTour';
 import TourButton from '../components/TourButton';
+import ChatBot from '../components/ChatBot';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -189,6 +190,10 @@ const WelcomePage: React.FC = () => {
     });
   };
 
+  const handleChatBotNavigate = (path: string) => {
+    navigate(path);
+  };
+
   return (
     <div 
       ref={backgroundRef}
@@ -267,6 +272,11 @@ const WelcomePage: React.FC = () => {
           }}
         />
       )}
+
+      {/* ChatBot - Available from welcome page */}
+      <div className="pointer-events-auto">
+        <ChatBot onNavigate={handleChatBotNavigate} />
+      </div>
     </div>
   );
 };

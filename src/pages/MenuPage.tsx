@@ -10,6 +10,7 @@ import CustomizationModal from '../components/CustomizationModal';
 import SuggestionsModal from '../components/SuggestionsModal';
 import SearchBar from '../components/SearchBar';
 import TourButton from '../components/TourButton';
+import ChatBot from '../components/ChatBot';
 import { categories, menuItems, customizationOptions } from '../data/menu';
 import { MenuItem } from '../types';
 import { useOrder } from '../context/OrderContext';
@@ -269,6 +270,14 @@ const MenuPage: React.FC = () => {
     });
   };
 
+  const handleChatBotProductSelect = (product: MenuItem) => {
+    setSelectedItem(product);
+  };
+
+  const handleChatBotNavigate = (path: string) => {
+    navigate(path);
+  };
+
   const cartTotal = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // Show global search results when searching
@@ -385,7 +394,7 @@ const MenuPage: React.FC = () => {
         
         {/* Floating cart button */}
         {cartTotal > 0 && (
-          <div ref={cartButtonRef} className="fixed bottom-8 right-8 z-50" data-tour="cart-button">
+          <div ref={cartButtonRef} className="fixed bottom-8 right-24 z-40" data-tour="cart-button">
             <button
               onClick={() => navigate('/cart')}
               className="flex items-center bg-[#FF8C00] text-white px-6 py-4 rounded-full shadow-lg hover:bg-orange-600 transition-all hover:scale-105 hover:shadow-xl"
@@ -405,6 +414,12 @@ const MenuPage: React.FC = () => {
             className="bottom-6 left-6"
           />
         )}
+
+        {/* ChatBot - Intelligent Assistant */}
+        <ChatBot 
+          onProductSelect={handleChatBotProductSelect}
+          onNavigate={handleChatBotNavigate}
+        />
       </div>
     </Layout>
   );
