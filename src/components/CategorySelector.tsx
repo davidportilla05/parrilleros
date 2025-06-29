@@ -39,7 +39,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   );
 
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-4 mt-15">
+    <div className="bg-white shadow-lg rounded-2xl p-4 mt-18">
       {/* Main categories */}
       <div className="flex space-x-4 overflow-x-auto px-2 pb-4">
         {nonBurgerCategories.map((category) => (
