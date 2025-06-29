@@ -59,7 +59,7 @@ const WelcomePage: React.FC = () => {
             <Beef size={80} className="text-white" />
           </div>
           <h1 className="text-5xl font-extrabold text-white mb-2 font-heavyrust-primary">PARRILLEROS</h1>
-          <p className="text-2xl text-[#FF8C00] font-bold">FAST FOOD</p>
+          <p className="text-2xl text-[#FF8C00] font-bold font-bebas-neue-primary">FAST FOOD</p>
         </div>
         
         <div className={`transition-all duration-700 delay-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>

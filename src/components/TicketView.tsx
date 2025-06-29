@@ -56,7 +56,7 @@ const TicketView: React.FC<TicketViewProps> = ({ onDone }) => {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h3 className="font-bold text-xl font-heavyrust-primary">PARRILLEROS</h3>
-                <p className="text-gray-600 text-sm">Fast Food</p>
+                <p className="text-gray-600 text-sm font-bebas-neue-primary">FAST FOOD</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-600">{new Date().toLocaleDateString()}</p>

@@ -5,6 +5,9 @@
 /* Import HEAVYRUST font */
 @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
 
+/* Import BEBAS NEUE font for FAST FOOD */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
 /* Custom HEAVYRUST-style font class */
 .font-heavyrust {
   font-family: 'Creepster', cursive;
@@ -29,6 +32,33 @@
   font-family: 'HEAVYRUST', 'Creepster', cursive;
   font-weight: 400;
   letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* BEBAS NEUE font for FAST FOOD */
+.font-bebas-neue {
+  font-family: 'Bebas Neue', cursive;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Alternative local BEBAS NEUE font if available */
+@font-face {
+  font-family: 'BEBAS NEUE';
+  src: url('/fonts/BEBAS-NEUE.woff2') format('woff2'),
+       url('/fonts/BEBAS-NEUE.woff') format('woff'),
+       url('/fonts/BEBAS-NEUE.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Primary BEBAS NEUE class with fallback */
+.font-bebas-neue-primary {
+  font-family: 'BEBAS NEUE', 'Bebas Neue', cursive;
+  font-weight: 400;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 

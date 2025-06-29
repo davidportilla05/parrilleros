@@ -70,7 +70,7 @@ const Layout: React.FC<LayoutProps> = ({
 
       {/* Footer */}
       <footer className="bg-[#1A1A1A] text-white p-4 text-center">
-        <p className="text-sm">&copy; 2025 <span className="font-heavyrust-primary">PARRILLEROS</span> Fast Food</p>
+        <p className="text-sm">&copy; 2025 <span className="font-heavyrust-primary">PARRILLEROS</span> <span className="font-bebas-neue-primary">FAST FOOD</span></p>
       </footer>
     </div>
   );
