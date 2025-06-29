@@ -122,10 +122,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   };
 
   const generateTicketContent = () => {
-    // Cálculos de impuestos
-    const subtotal = total * 0.84; // Base gravable (84%)
+    // Cálculos de impuestos corregidos - solo IVA
+    const subtotal = total * 0.92; // Base gravable (92%)
     const iva = total * 0.08; // IVA (8%)
-    const impoconsumo = total * 0.08; // Impoconsumo (8%)
 
     const cartDetails = cart.map((item, index) => {
       const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
@@ -167,7 +166,6 @@ ${cartDetails}
 💰 DESGLOSE DE COSTOS
 • Subtotal: $${Math.round(subtotal).toLocaleString()}
 • IVA (8%): $${Math.round(iva).toLocaleString()}
-• Impoconsumo (8%): $${Math.round(impoconsumo).toLocaleString()}
 • TOTAL: $${Math.round(total).toLocaleString()}
 
 💳 Forma de pago: ${formData.paymentMethod}
@@ -258,9 +256,8 @@ ${cartDetails}
 
   // Success confirmation screen
   if (orderSubmitted) {
-    const subtotal = total * 0.84;
+    const subtotal = total * 0.92;
     const iva = total * 0.08;
-    const impoconsumo = total * 0.08;
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center p-4">
@@ -309,7 +306,7 @@ ${cartDetails}
               <span className="font-medium text-right">{formData.address}, {formData.neighborhood}</span>
             </div>
 
-            {/* Desglose de costos detallado */}
+            {/* Desglose de costos corregido - solo IVA */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h4 className="font-bold text-blue-800 mb-3">💰 Desglose de Costos:</h4>
               <div className="space-y-2 text-sm">
@@ -320,10 +317,6 @@ ${cartDetails}
                 <div className="flex justify-between">
                   <span className="text-blue-700">IVA (8%):</span>
                   <span className="font-medium">${Math.round(iva).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Impoconsumo (8%):</span>
-                  <span className="font-medium">${Math.round(impoconsumo).toLocaleString()}</span>
                 </div>
                 <div className="border-t border-blue-300 pt-2 mt-2">
                   <div className="flex justify-between font-bold text-base">
