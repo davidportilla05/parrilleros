@@ -183,20 +183,31 @@ export const cartTourSteps: TourStep[] = [
   }
 ];
 
-export const deliveryTourSteps: TourStep[] = [
+export const locationSelectionTourSteps: TourStep[] = [
   {
-    element: '[data-tour="location-selector"]',
+    element: '[data-tour="location-grid"]',
     popover: {
-      title: '📍 Selección de Sede',
-      description: 'Primero elige la sede más cercana a tu ubicación para un mejor servicio.',
-      side: 'right'
+      title: '📍 Selecciona tu Sede',
+      description: 'Elige la sede más cercana a tu ubicación para un mejor servicio de domicilio.',
+      side: 'bottom'
     }
   },
+  {
+    element: '[data-tour="continue-button"]',
+    popover: {
+      title: '✅ Continuar',
+      description: 'Una vez seleccionada tu sede, usa este botón para continuar con el formulario.',
+      side: 'top'
+    }
+  }
+];
+
+export const deliveryFormTourSteps: TourStep[] = [
   {
     element: '[data-tour="delivery-form"]',
     popover: {
       title: '📝 Datos de Entrega',
-      description: 'Completa tus datos personales y dirección de entrega. Todos los campos son obligatorios.',
+      description: 'Completa todos tus datos personales y dirección de entrega. Todos los campos son obligatorios.',
       side: 'left'
     }
   },
@@ -206,6 +217,14 @@ export const deliveryTourSteps: TourStep[] = [
       title: '💰 Resumen Final',
       description: 'Revisa una vez más tu pedido y el total antes de enviarlo.',
       side: 'left'
+    }
+  },
+  {
+    element: '[data-tour="submit-button"]',
+    popover: {
+      title: '🚀 Enviar Pedido',
+      description: 'Una vez completados todos los datos, envía tu pedido y te contactaremos pronto.',
+      side: 'top'
     }
   }
 ];
