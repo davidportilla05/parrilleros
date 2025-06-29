@@ -47,7 +47,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, placeholder = "Buscar p
       
       {/* Search suggestions hint */}
       {!query && (
-        <div className="absolute top-full left-0 right-0 mt-20 mb-10 text-center">
+        <div className="absolute top-full left-0 right-0 mt-20zz mb-10 text-center">
           <p className="text-xs text-gray-400 bg-white px-3 py-1 rounded-full shadow-sm inline-block">
             💡 Prueba: "hamburguesa", "bebidas", "papas"
           </p>
