@@ -21,7 +21,7 @@ export const locations: Location[] = [
     name: 'Parrilleros Norte',
     address: 'Carrera 15 #45-20, Versalles',
     phone: '(602) 555-0102',
-    whatsapp: '+573186025828',
+    whatsapp: '+573148300987',
     neighborhood: 'Versalles',
     deliveryZones: [
       'Versalles',
