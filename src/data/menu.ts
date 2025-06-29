@@ -4,7 +4,7 @@ export const categories: Category[] = [
   { id: 'burgers', name: 'Hamburguesas', icon: 'beef' },
   { id: 'classic-burgers', name: 'Hamburguesas Clásicas', icon: 'beef' },
   { id: 'deluxe-burgers', name: 'Hamburguesas Deluxe', icon: 'beef' },
-  { id: 'contest-burgers', name: 'Hamburguesas de Concurso', icon: 'beef' },
+  { id: 'contest-burgers', name: 'Hamburguesas Burger Master', icon: 'beef' },
   { id: 'hotdogs', name: 'Perros Calientes', icon: 'beef' },
   { id: 'fries', name: 'Papas', icon: 'french-fries' },
   { id: 'sides', name: 'Acompañamientos', icon: 'french-fries' },
@@ -104,7 +104,7 @@ export const menuItems: MenuItem[] = [
     badges: ['https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg?auto=compress&cs=tinysrgb&w=100'],
   },
 
-  // Hamburguesas de Concurso
+  // Hamburguesas Burger Master (anteriormente de Concurso)
   {
     id: 12,
     name: 'Burguer Parrillera ROLLY BURGUER',

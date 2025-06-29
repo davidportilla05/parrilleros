@@ -63,7 +63,7 @@ const MenuCard: React.FC<MenuCardProps> = ({ item, onClick }) => {
             <div className="bg-black/80 text-white text-xs px-3 py-1.5 rounded-full font-medium">
               {category === 'classic-burgers' ? '🍔 Clásica' : 
                category === 'deluxe-burgers' ? '👑 Deluxe' : 
-               '🏆 Concurso'}
+               '🏆 Burger Master'}
             </div>
           </div>
         )}
