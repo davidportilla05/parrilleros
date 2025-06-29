@@ -122,8 +122,10 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   };
 
   const generateTicketContent = () => {
-    const subtotal = total * 0.92;
-    const iva = total * 0.08;
+    // Cálculos de impuestos
+    const subtotal = total * 0.84; // Base gravable (84%)
+    const iva = total * 0.08; // IVA (8%)
+    const impoconsumo = total * 0.08; // Impoconsumo (8%)
 
     const cartDetails = cart.map((item, index) => {
       const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
@@ -162,8 +164,14 @@ ${formData.address}, ${formData.neighborhood}
 🛒 PRODUCTOS
 ${cartDetails}
 
-💰 TOTAL: $${Math.round(total).toLocaleString()} (${formData.paymentMethod})
-⏰ Tiempo: 45-60 min
+💰 DESGLOSE DE COSTOS
+• Subtotal: $${Math.round(subtotal).toLocaleString()}
+• IVA (8%): $${Math.round(iva).toLocaleString()}
+• Impoconsumo (8%): $${Math.round(impoconsumo).toLocaleString()}
+• TOTAL: $${Math.round(total).toLocaleString()}
+
+💳 Forma de pago: ${formData.paymentMethod}
+⏰ Tiempo estimado: 45-60 minutos
 
 ¡PROCESAR INMEDIATAMENTE!
 
@@ -250,6 +258,10 @@ ${cartDetails}
 
   // Success confirmation screen
   if (orderSubmitted) {
+    const subtotal = total * 0.84;
+    const iva = total * 0.08;
+    const impoconsumo = total * 0.08;
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
@@ -296,10 +308,30 @@ ${cartDetails}
               <span className="text-gray-600">📍 Dirección:</span>
               <span className="font-medium text-right">{formData.address}, {formData.neighborhood}</span>
             </div>
-            
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">💰 Total:</span>
-              <span className="font-bold text-[#FF8C00] text-lg">${Math.round(total).toLocaleString()}</span>
+
+            {/* Desglose de costos detallado */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-bold text-blue-800 mb-3">💰 Desglose de Costos:</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-blue-700">Subtotal:</span>
+                  <span className="font-medium">${Math.round(subtotal).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-blue-700">IVA (8%):</span>
+                  <span className="font-medium">${Math.round(iva).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-blue-700">Impoconsumo (8%):</span>
+                  <span className="font-medium">${Math.round(impoconsumo).toLocaleString()}</span>
+                </div>
+                <div className="border-t border-blue-300 pt-2 mt-2">
+                  <div className="flex justify-between font-bold text-base">
+                    <span className="text-blue-800">TOTAL:</span>
+                    <span className="text-[#FF8C00]">${Math.round(total).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
