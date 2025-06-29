@@ -55,7 +55,7 @@ const TicketView: React.FC<TicketViewProps> = ({ onDone }) => {
           <div className="p-6 pb-8">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="font-bold text-xl">Parrilleros</h3>
+                <h3 className="font-bold text-xl font-heavyrust-primary">PARRILLEROS</h3>
                 <p className="text-gray-600 text-sm">Fast Food</p>
               </div>
               <div className="text-right">

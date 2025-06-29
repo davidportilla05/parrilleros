@@ -275,7 +275,7 @@ ${cartDetails}
               📞 Te contactaremos pronto
             </p>
             <p className="text-sm text-orange-700">
-              El equipo de <strong>{selectedLocation?.name}</strong> se comunicará contigo en los próximos minutos para confirmar tu pedido y coordinar la entrega.
+              El equipo de <strong className="font-heavyrust-primary">{selectedLocation?.name}</strong> se comunicará contigo en los próximos minutos para confirmar tu pedido y coordinar la entrega.
             </p>
           </div>
 
@@ -288,7 +288,7 @@ ${cartDetails}
             
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">🏪 Sede:</span>
-              <span className="font-medium">{selectedLocation?.name}</span>
+              <span className="font-medium font-heavyrust-primary">{selectedLocation?.name}</span>
             </div>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -429,7 +429,7 @@ ${cartDetails}
               </div>
               <div>
                 <p className="font-medium text-green-800">
-                  Sede seleccionada: {selectedLocation?.name}
+                  Sede seleccionada: <span className="font-heavyrust-primary">{selectedLocation?.name}</span>
                 </p>
                 <p className="text-sm text-green-600">
                   {selectedLocation?.address} | {selectedLocation?.phone}
@@ -491,7 +491,7 @@ ${cartDetails}
                   />
                   <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-xs text-blue-800 font-medium mb-1">
-                      📍 Zonas de entrega para {selectedLocation?.name}:
+                      📍 Zonas de entrega para <span className="font-heavyrust-primary">{selectedLocation?.name}</span>:
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {selectedLocation?.deliveryZones.map((zone, index) => (

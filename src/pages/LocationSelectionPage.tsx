@@ -124,7 +124,7 @@ const LocationSelectionPage: React.FC<LocationSelectionPageProps> = ({
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center mb-3">
-                      <h3 className="font-bold text-xl text-gray-800 mr-3">
+                      <h3 className="font-bold text-xl text-gray-800 mr-3 font-heavyrust-primary">
                         {location.name}
                       </h3>
                       {selectedLocation?.id === location.id && (
@@ -199,7 +199,7 @@ const LocationSelectionPage: React.FC<LocationSelectionPageProps> = ({
             {selectedLocation ? (
               <>
                 <CheckCircle size={24} className="mr-2" />
-                Continuar con {selectedLocation.name}
+                Continuar con <span className="font-heavyrust-primary">{selectedLocation.name}</span>
               </>
             ) : (
               <>
@@ -217,7 +217,7 @@ const LocationSelectionPage: React.FC<LocationSelectionPageProps> = ({
                 </div>
                 <div>
                   <p className="font-medium text-green-800">
-                    Sede seleccionada: {selectedLocation.name}
+                    Sede seleccionada: <span className="font-heavyrust-primary">{selectedLocation.name}</span>
                   </p>
                   <p className="text-sm text-green-600">
                     Tu pedido será procesado por esta sede

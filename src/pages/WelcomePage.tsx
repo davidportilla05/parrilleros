@@ -58,7 +58,7 @@ const WelcomePage: React.FC = () => {
           <div className="inline-flex items-center justify-center w-32 h-32 bg-[#FF8C00] rounded-full mb-6">
             <Beef size={80} className="text-white" />
           </div>
-          <h1 className="text-5xl font-extrabold text-white mb-2">PARRILLEROS</h1>
+          <h1 className="text-5xl font-extrabold text-white mb-2 font-heavyrust-primary">PARRILLEROS</h1>
           <p className="text-2xl text-[#FF8C00] font-bold">FAST FOOD</p>
         </div>
         

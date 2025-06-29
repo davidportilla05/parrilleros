@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import HEAVYRUST font */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+
+/* Custom HEAVYRUST-style font class */
+.font-heavyrust {
+  font-family: 'Creepster', cursive;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Alternative local font if available */
+@font-face {
+  font-family: 'HEAVYRUST';
+  src: url('/fonts/HEAVYRUST.woff2') format('woff2'),
+       url('/fonts/HEAVYRUST.woff') format('woff'),
+       url('/fonts/HEAVYRUST.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Fallback to Creepster if HEAVYRUST is not available */
+.font-heavyrust-primary {
+  font-family: 'HEAVYRUST', 'Creepster', cursive;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 /* Driver.js Custom Styles for Kiosk */
 .kiosk-tour-popover {
   background: white !important;
