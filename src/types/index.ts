@@ -47,3 +47,13 @@ export interface Order {
   status: 'pending' | 'completed' | 'cancelled';
   timestamp: Date;
 }
+
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  whatsapp: string;
+  neighborhood: string;
+  deliveryZones: string[];
+}

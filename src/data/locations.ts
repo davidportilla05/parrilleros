@@ -1,0 +1,49 @@
+import { Location } from '../types';
+
+export const locations: Location[] = [
+  {
+    id: 'sede-centro',
+    name: 'Parrilleros Centro',
+    address: 'Calle 18 #25-45, Centro',
+    phone: '(602) 555-0101',
+    whatsapp: '+573186025827',
+    neighborhood: 'Centro',
+    deliveryZones: [
+      'Centro',
+      'La Merced',
+      'San Antonio',
+      'El Calvario',
+      'Las Nieves'
+    ]
+  },
+  {
+    id: 'sede-norte',
+    name: 'Parrilleros Norte',
+    address: 'Carrera 15 #45-20, Versalles',
+    phone: '(602) 555-0102',
+    whatsapp: '+573186025828',
+    neighborhood: 'Versalles',
+    deliveryZones: [
+      'Versalles',
+      'Flora Industrial',
+      'San Fernando',
+      'Champagnat',
+      'Los Álamos'
+    ]
+  },
+  {
+    id: 'sede-sur',
+    name: 'Parrilleros Sur',
+    address: 'Calle 5 #30-15, Fatima',
+    phone: '(602) 555-0103',
+    whatsapp: '+573186025829',
+    neighborhood: 'Fatima',
+    deliveryZones: [
+      'Fatima',
+      'Corazón de Jesús',
+      'Bolivariano',
+      'San Vicente',
+      'Pandiaco'
+    ]
+  }
+];
