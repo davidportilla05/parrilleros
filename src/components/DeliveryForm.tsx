@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck } from 'lucide-react';
+import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck, Download, Printer } from 'lucide-react';
 import { useOrder } from '../context/OrderContext';
 import OrderSummary from './OrderSummary';
 import LocationSelector from './LocationSelector';
@@ -26,6 +26,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const ticketRef = useRef<HTMLDivElement>(null);
 
   const paymentMethods = [
     'Efectivo',
@@ -57,49 +58,37 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
            cart.length > 0;
   };
 
-  const handleSubmit = async () => {
-    if (!isFormValid() || !selectedLocation) return;
-    
-    setIsSubmitting(true);
-    
-    // Simulate order processing
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setOrderSubmitted(true);
+  const generateTicketContent = () => {
+    const subtotal = total * 0.92;
+    const iva = total * 0.08;
 
-      // Calculate costs
-      const subtotal = total * 0.92;
-      const iva = total * 0.08;
+    const cartDetails = cart.map((item, index) => {
+      const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
+      const customizationsTotal = item.customizations.reduce((sum, option) => sum + option.price, 0);
+      const itemSubtotal = (basePrice + customizationsTotal) * item.quantity;
+      
+      let itemText = `${index + 1}. ${item.menuItem.name}`;
+      if (item.withFries) {
+        itemText += ' + Papas';
+      }
+      itemText += `\n   • Cantidad: ${item.quantity}`;
+      itemText += `\n   • Precio unitario: $${basePrice.toLocaleString()}`;
+      
+      if (item.customizations.length > 0) {
+        itemText += `\n   • Personalizaciones: ${item.customizations.map(c => c.name.replace('AD ', '')).join(', ')}`;
+        itemText += `\n   • Costo personalizaciones: $${customizationsTotal.toLocaleString()}`;
+      }
+      
+      if (item.specialInstructions) {
+        itemText += `\n   • Instrucciones: ${item.specialInstructions}`;
+      }
+      
+      itemText += `\n   • Subtotal: $${Math.round(itemSubtotal).toLocaleString()}`;
+      
+      return itemText;
+    }).join('\n\n');
 
-      // Construct detailed cart information
-      const cartDetails = cart.map((item, index) => {
-        const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
-        const customizationsTotal = item.customizations.reduce((sum, option) => sum + option.price, 0);
-        const itemSubtotal = (basePrice + customizationsTotal) * item.quantity;
-        
-        let itemText = `${index + 1}. ${item.menuItem.name}`;
-        if (item.withFries) {
-          itemText += ' + Papas';
-        }
-        itemText += `\n   • Cantidad: ${item.quantity}`;
-        itemText += `\n   • Precio unitario: $${basePrice.toLocaleString()}`;
-        
-        if (item.customizations.length > 0) {
-          itemText += `\n   • Personalizaciones: ${item.customizations.map(c => c.name.replace('AD ', '')).join(', ')}`;
-          itemText += `\n   • Costo personalizaciones: $${customizationsTotal.toLocaleString()}`;
-        }
-        
-        if (item.specialInstructions) {
-          itemText += `\n   • Instrucciones: ${item.specialInstructions}`;
-        }
-        
-        itemText += `\n   • Subtotal: $${Math.round(itemSubtotal).toLocaleString()}`;
-        
-        return itemText;
-      }).join('\n\n');
-
-      // Construct WhatsApp message with exact format
-      const message = `🍔 NUEVO PEDIDO DOMICILIO - PARRILLEROS
+    return `🍔 NUEVO PEDIDO DOMICILIO - PARRILLEROS
 ═══════════════════════════════════════
 
 📋 INFORMACIÓN DEL PEDIDO
@@ -132,9 +121,64 @@ ${cartDetails}
 
 ¡Procesar inmediatamente!
 
-📍 SEDE RESPONSABLE: ${selectedLocation.name}
-📞 Teléfono sede: ${selectedLocation.phone}
-🏠 Dirección sede: ${selectedLocation.address}`;
+📍 SEDE RESPONSABLE: ${selectedLocation?.name}
+📞 Teléfono sede: ${selectedLocation?.phone}
+🏠 Dirección sede: ${selectedLocation?.address}`;
+  };
+
+  const handleDownloadTicket = () => {
+    const ticketContent = generateTicketContent();
+    const blob = new Blob([ticketContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Ticket_Parrilleros_${orderNumber.toString().padStart(3, '0')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrintTicket = () => {
+    if (ticketRef.current) {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Ticket Parrilleros #${orderNumber.toString().padStart(3, '0')}</title>
+              <style>
+                body { font-family: monospace; font-size: 12px; line-height: 1.4; margin: 20px; }
+                .header { text-align: center; margin-bottom: 20px; }
+                .section { margin-bottom: 15px; }
+                .section-title { font-weight: bold; margin-bottom: 5px; }
+                .item { margin-bottom: 10px; }
+                .total { font-weight: bold; font-size: 14px; }
+              </style>
+            </head>
+            <body>
+              <pre>${generateTicketContent()}</pre>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!isFormValid() || !selectedLocation) return;
+    
+    setIsSubmitting(true);
+    
+    // Simulate order processing
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setOrderSubmitted(true);
+
+      // Construct WhatsApp message with exact format
+      const message = generateTicketContent();
       
       // Encode message and create WhatsApp URL with selected location's WhatsApp
       const encodedMessage = encodeURIComponent(message);
@@ -172,6 +216,7 @@ ${cartDetails}
             </p>
           </div>
 
+          {/* Detailed Order Information */}
           <div className="space-y-3 mb-6 text-left">
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">📋 Número de pedido:</span>
@@ -192,6 +237,11 @@ ${cartDetails}
               <span className="text-gray-600">📱 Teléfono:</span>
               <span className="font-medium">{formData.phone}</span>
             </div>
+
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">📍 Dirección:</span>
+              <span className="font-medium text-right">{formData.address}, {formData.neighborhood}</span>
+            </div>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">💰 Total:</span>
@@ -204,12 +254,53 @@ ${cartDetails}
             </div>
           </div>
 
+          {/* Order Items Summary */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <h4 className="font-bold text-blue-800 mb-3">🛒 Resumen del pedido:</h4>
+            <div className="space-y-2 text-left">
+              {cart.map((item, index) => (
+                <div key={item.id} className="text-sm">
+                  <span className="font-medium text-blue-700">
+                    {index + 1}. {item.menuItem.name}
+                    {item.withFries && ' + Papas'}
+                  </span>
+                  <span className="text-blue-600 ml-2">x{item.quantity}</span>
+                  {item.customizations.length > 0 && (
+                    <div className="text-xs text-blue-600 ml-4">
+                      + {item.customizations.map(c => c.name.replace('AD ', '')).join(', ')}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <div className="flex items-center justify-center mb-2">
               <Clock size={20} className="text-blue-600 mr-2" />
               <span className="font-bold text-blue-800">Tiempo estimado</span>
             </div>
             <p className="text-2xl font-bold text-blue-600">45-60 minutos</p>
+          </div>
+
+          {/* Ticket Actions */}
+          <div className="space-y-3 mb-6">
+            <div className="flex gap-2">
+              <button
+                onClick={handleDownloadTicket}
+                className="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center text-sm"
+              >
+                <Download size={16} className="mr-1" />
+                Descargar Ticket
+              </button>
+              <button
+                onClick={handlePrintTicket}
+                className="flex-1 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center text-sm"
+              >
+                <Printer size={16} className="mr-1" />
+                Imprimir
+              </button>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -219,6 +310,11 @@ ${cartDetails}
             >
               Finalizar
             </button>
+          </div>
+
+          {/* Hidden ticket content for printing */}
+          <div ref={ticketRef} className="hidden">
+            <pre>{generateTicketContent()}</pre>
           </div>
         </div>
       </div>
