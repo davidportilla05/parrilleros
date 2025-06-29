@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import Layout from '../components/Layout';
@@ -7,9 +7,11 @@ import MenuCard from '../components/MenuCard';
 import CustomizationModal from '../components/CustomizationModal';
 import SuggestionsModal from '../components/SuggestionsModal';
 import SearchBar from '../components/SearchBar';
+import TourButton from '../components/TourButton';
 import { categories, menuItems, customizationOptions } from '../data/menu';
 import { MenuItem } from '../types';
 import { useOrder } from '../context/OrderContext';
+import { useDriverTour, menuTourSteps } from '../hooks/useDriverTour';
 
 const MenuPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +20,30 @@ const MenuPage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showTourButton, setShowTourButton] = useState(true);
+  
+  const { startTour } = useDriverTour({
+    steps: menuTourSteps,
+    onDestroyed: () => {
+      setShowTourButton(false);
+      // Hide tour button for 30 seconds after tour completion
+      setTimeout(() => {
+        setShowTourButton(true);
+      }, 30000);
+    }
+  });
+
+  // Auto-start tour for first-time users
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('parrilleros-menu-tour-seen');
+    if (!hasSeenTour) {
+      const timer = setTimeout(() => {
+        startTour();
+        localStorage.setItem('parrilleros-menu-tour-seen', 'true');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [startTour]);
   
   // Filter items based on category and search query
   const filteredItems = useMemo(() => {
@@ -70,6 +96,10 @@ const MenuPage: React.FC = () => {
     setSearchQuery(query);
   };
 
+  const handleStartTour = () => {
+    startTour();
+  };
+
   const cartTotal = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // Show global search results when searching
@@ -82,6 +112,7 @@ const MenuPage: React.FC = () => {
         {/* Enhanced Back Button */}
         <div className="max-w-4xl mx-auto mb-6">
           <button
+            data-tour="back-button"
             onClick={() => navigate('/')}
             className="group flex items-center bg-white hover:bg-[#FF8C00] text-[#FF8C00] hover:text-white px-4 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-2 border-[#FF8C00] font-semibold"
           >
@@ -94,7 +125,7 @@ const MenuPage: React.FC = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="max-w-4xl mx-auto mb-8">
+        <div className="max-w-4xl mx-auto mb-8" data-tour="search-bar">
           <SearchBar 
             onSearch={handleSearch}
             placeholder="Buscar hamburguesas, bebidas, acompañamientos..."
@@ -103,7 +134,7 @@ const MenuPage: React.FC = () => {
 
         {/* Category Selector - only show when not searching */}
         {showCategorySelector && (
-          <div className="max-w-4xl mx-auto mb-12">
+          <div className="max-w-4xl mx-auto mb-12" data-tour="category-selector">
             <CategorySelector
               categories={categories}
               selectedCategory={selectedCategory}
@@ -128,7 +159,7 @@ const MenuPage: React.FC = () => {
 
         {/* Menu Grid */}
         {itemsToShow.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto" data-tour="menu-grid">
             {itemsToShow.map((item) => (
               <MenuCard key={item.id} item={item} onClick={handleItemClick} />
             ))}
@@ -176,7 +207,7 @@ const MenuPage: React.FC = () => {
         
         {/* Floating cart button */}
         {cartTotal > 0 && (
-          <div className="fixed bottom-8 right-8 z-50">
+          <div className="fixed bottom-8 right-8 z-50" data-tour="cart-button">
             <button
               onClick={() => navigate('/cart')}
               className="flex items-center bg-[#FF8C00] text-white px-6 py-4 rounded-full shadow-lg hover:bg-orange-600 transition-all hover:scale-105 hover:shadow-xl"
@@ -185,6 +216,16 @@ const MenuPage: React.FC = () => {
               <span className="ml-3 font-bold text-lg">{cartTotal}</span>
             </button>
           </div>
+        )}
+
+        {/* Tour Button */}
+        {showTourButton && (
+          <TourButton 
+            onStartTour={handleStartTour}
+            variant="floating"
+            size="md"
+            className="bottom-8 left-8"
+          />
         )}
       </div>
     </Layout>

@@ -1,15 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Beef, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDriverTour, welcomeTourSteps } from '../hooks/useDriverTour';
+import TourButton from '../components/TourButton';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
   const [isAnimating, setIsAnimating] = useState(true);
+  const [showTourButton, setShowTourButton] = useState(false);
+
+  const { startTour } = useDriverTour({
+    steps: welcomeTourSteps,
+    onDestroyed: () => {
+      // Auto-navigate to menu after welcome tour
+      setTimeout(() => {
+        navigate('/menu');
+      }, 1000);
+    }
+  });
 
   useEffect(() => {
     // Start animation when component mounts
     const timer = setTimeout(() => {
       setIsAnimating(false);
+      // Show tour button after animation
+      setTimeout(() => {
+        setShowTourButton(true);
+      }, 500);
     }, 1500);
     
     return () => clearTimeout(timer);
@@ -17,6 +34,10 @@ const WelcomePage: React.FC = () => {
 
   const handleStart = () => {
     navigate('/menu');
+  };
+
+  const handleStartTour = () => {
+    startTour();
   };
 
   return (
@@ -42,9 +63,25 @@ const WelcomePage: React.FC = () => {
         </div>
         
         <div className={`transition-all duration-700 delay-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
-          <p className="text-white text-xl mb-12 max-w-md mx-auto">
+          <p className="text-white text-xl mb-8 max-w-md mx-auto">
             Bienvenido a tu experiencia de autoservicio. Toque la pantalla para comenzar su pedido.
           </p>
+          
+          {/* Tour Button - Inline version */}
+          {showTourButton && (
+            <div className="mb-6">
+              <TourButton 
+                onStartTour={handleStartTour}
+                variant="inline"
+                size="lg"
+                className="mb-4 pointer-events-auto"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  handleStartTour();
+                }}
+              />
+            </div>
+          )}
           
           <div className="inline-flex items-center bg-[#FF8C00] text-white px-8 py-4 rounded-full text-xl font-bold hover:bg-orange-600 transition-colors cursor-pointer animate-bounce">
             Toque para comenzar
@@ -52,6 +89,20 @@ const WelcomePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Tour Button */}
+      {showTourButton && (
+        <TourButton 
+          onStartTour={handleStartTour}
+          variant="floating"
+          size="lg"
+          className="pointer-events-auto"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            handleStartTour();
+          }}
+        />
+      )}
     </div>
   );
 };

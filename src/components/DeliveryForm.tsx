@@ -4,8 +4,10 @@ import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, Check
 import { useOrder } from '../context/OrderContext';
 import OrderSummary from './OrderSummary';
 import LocationSelector from './LocationSelector';
+import TourButton from './TourButton';
 import { locations } from '../data/locations';
 import { Location } from '../types';
+import { useDriverTour, deliveryTourSteps } from '../hooks/useDriverTour';
 
 interface DeliveryFormProps {
   onBack: () => void;
@@ -26,7 +28,30 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const [showTourButton, setShowTourButton] = useState(true);
   const ticketRef = useRef<HTMLDivElement>(null);
+
+  const { startTour } = useDriverTour({
+    steps: deliveryTourSteps,
+    onDestroyed: () => {
+      setShowTourButton(false);
+      setTimeout(() => {
+        setShowTourButton(true);
+      }, 30000);
+    }
+  });
+
+  // Auto-start tour for first-time users
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('parrilleros-delivery-tour-seen');
+    if (!hasSeenTour) {
+      const timer = setTimeout(() => {
+        startTour();
+        localStorage.setItem('parrilleros-delivery-tour-seen', 'true');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [startTour]);
 
   const paymentMethods = [
     'Efectivo',
@@ -44,6 +69,10 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
+  };
+
+  const handleStartTour = () => {
+    startTour();
   };
 
   const isFormValid = () => {
@@ -335,15 +364,17 @@ ${cartDetails}
           {/* Left Column - Location and Form */}
           <div className="space-y-6">
             {/* Location Selector */}
-            <LocationSelector
-              locations={locations}
-              selectedLocation={selectedLocation}
-              onSelectLocation={handleLocationSelect}
-            />
+            <div data-tour="location-selector">
+              <LocationSelector
+                locations={locations}
+                selectedLocation={selectedLocation}
+                onSelectLocation={handleLocationSelect}
+              />
+            </div>
 
             {/* Form - only show if location is selected */}
             {selectedLocation && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-lg shadow-md p-6" data-tour="delivery-form">
                 <h2 className="text-xl font-bold mb-6 text-gray-800">Datos de Entrega</h2>
                 
                 <div className="space-y-4">
@@ -505,10 +536,19 @@ ${cartDetails}
           </div>
 
           {/* Right Column - Order Summary */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6" data-tour="order-summary-delivery">
             <OrderSummary />
           </div>
         </div>
+
+        {/* Tour Button */}
+        {showTourButton && !orderSubmitted && (
+          <TourButton 
+            onStartTour={handleStartTour}
+            variant="floating"
+            size="md"
+          />
+        )}
       </div>
     </div>
   );

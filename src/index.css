@@ -2,6 +2,120 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Driver.js Custom Styles for Kiosk */
+.kiosk-tour-popover {
+  background: white !important;
+  border: 2px solid #FF8C00 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  font-family: system-ui, -apple-system, sans-serif !important;
+}
+
+.kiosk-tour-popover .driver-popover-title {
+  color: #1F2937 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+  border-bottom: 2px solid #FF8C00 !important;
+  padding-bottom: 8px !important;
+}
+
+.kiosk-tour-popover .driver-popover-description {
+  color: #4B5563 !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  margin-bottom: 16px !important;
+}
+
+.kiosk-tour-popover .driver-popover-footer {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid #E5E7EB !important;
+}
+
+.kiosk-tour-popover .driver-popover-navigation-btns {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.kiosk-tour-popover .driver-popover-btn {
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.kiosk-tour-popover .driver-popover-next-btn {
+  background: #FF8C00 !important;
+  color: white !important;
+}
+
+.kiosk-tour-popover .driver-popover-next-btn:hover {
+  background: #EA7C00 !important;
+  transform: translateY(-1px) !important;
+}
+
+.kiosk-tour-popover .driver-popover-prev-btn {
+  background: #F3F4F6 !important;
+  color: #374151 !important;
+}
+
+.kiosk-tour-popover .driver-popover-prev-btn:hover {
+  background: #E5E7EB !important;
+}
+
+.kiosk-tour-popover .driver-popover-close-btn {
+  background: #EF4444 !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+}
+
+.kiosk-tour-popover .driver-popover-close-btn:hover {
+  background: #DC2626 !important;
+}
+
+.kiosk-tour-popover .driver-popover-progress-text {
+  color: #6B7280 !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+.kiosk-tour-active {
+  border: 3px solid #FF8C00 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.2) !important;
+}
+
+/* Custom animations for tour elements */
+@keyframes tour-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 140, 0, 0.1);
+  }
+}
+
+.kiosk-tour-active {
+  animation: tour-pulse 2s infinite !important;
+}
+
 /* Print styles */
 @media print {
   body * {
@@ -24,5 +138,36 @@
   button,
   .no-print {
     display: none !important;
+  }
+}
+
+/* Tour button specific styles */
+.tour-button-floating {
+  backdrop-filter: blur(10px);
+  background: rgba(59, 130, 246, 0.9) !important;
+}
+
+.tour-button-floating:hover {
+  background: rgba(37, 99, 235, 0.95) !important;
+}
+
+/* Responsive tour adjustments */
+@media (max-width: 768px) {
+  .kiosk-tour-popover {
+    max-width: 90vw !important;
+    margin: 10px !important;
+  }
+  
+  .kiosk-tour-popover .driver-popover-title {
+    font-size: 1.125rem !important;
+  }
+  
+  .kiosk-tour-popover .driver-popover-description {
+    font-size: 0.875rem !important;
+  }
+  
+  .kiosk-tour-popover .driver-popover-btn {
+    padding: 6px 12px !important;
+    font-size: 0.75rem !important;
   }
 }
