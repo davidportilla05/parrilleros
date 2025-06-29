@@ -37,21 +37,7 @@ const Layout: React.FC<LayoutProps> = ({
               </button>
             )}
             <div className="flex items-center">
-              <div className="w-8 h-8 mr-2 flex items-center justify-center">
-                <img 
-                  src="/public/image.png" 
-                  alt="Parrilleros Logo" 
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    // Fallback to Beef icon if image fails to load
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const fallback = target.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'block';
-                  }}
-                />
-                <Beef size={32} className="text-[#FF8C00] hidden" />
-              </div>
+              <Beef size={32} className="mr-2 text-[#FF8C00]" />
               <h1 className="text-2xl font-bold">Parrilleros</h1>
             </div>
           </div>
