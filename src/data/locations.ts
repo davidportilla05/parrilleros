@@ -2,7 +2,7 @@ import { Location } from '../types';
 
 export const locations: Location[] = [
   {
-    id: 'sede-centro',
+    id: 'sede-tamasagra',
     name: 'Parrilleros Centro',
     address: 'Calle 18 #25-45, Centro',
     phone: '(602) 555-0101',
@@ -17,7 +17,7 @@ export const locations: Location[] = [
     ]
   },
   {
-    id: 'sede-norte',
+    id: 'sede-san ignacio',
     name: 'Parrilleros Norte',
     address: 'Carrera 15 #45-20, Versalles',
     phone: '(602) 555-0102',
@@ -32,7 +32,7 @@ export const locations: Location[] = [
     ]
   },
   {
-    id: 'sede-sur',
+    id: 'sede-las cuadras',
     name: 'Parrilleros Sur',
     address: 'Calle 5 #30-15, Fatima',
     phone: '(602) 555-0103',
