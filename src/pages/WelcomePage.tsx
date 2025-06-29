@@ -67,14 +67,14 @@ const WelcomePage: React.FC = () => {
             Bienvenido a tu experiencia de autoservicio. Toque la pantalla para comenzar su pedido.
           </p>
           
-          {/* Tour Button - Inline version */}
+          {/* Tour Button - Inline version - MUCHO MÁS GRANDE */}
           {showTourButton && (
-            <div className="mb-6">
+            <div className="mb-8">
               <TourButton 
                 onStartTour={handleStartTour}
                 variant="inline"
-                size="lg"
-                className="mb-4 pointer-events-auto"
+                size="xl"
+                className="mb-6 pointer-events-auto transform hover:scale-110 transition-all duration-300"
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   handleStartTour();
@@ -90,12 +90,12 @@ const WelcomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Tour Button */}
+      {/* Floating Tour Button - También más grande */}
       {showTourButton && (
         <TourButton 
           onStartTour={handleStartTour}
           variant="floating"
-          size="lg"
+          size="xl"
           className="pointer-events-auto"
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
