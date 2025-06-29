@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Mic, MicOff, ShoppingCart, Sparkles, Volume2 } from 'lucide-react';
+import { MessageCircle, X, Send, Mic, MicOff, ShoppingCart, Sparkles, Volume2, Plus, Trash2, MessageSquare, Clock } from 'lucide-react';
 import { useOrder } from '../context/OrderContext';
 import { menuItems } from '../data/menu';
 import { MenuItem } from '../types';
@@ -13,15 +13,25 @@ interface ChatMessage {
   products?: MenuItem[];
 }
 
+interface Conversation {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: Date;
+  lastActivity: Date;
+}
+
 interface ChatBotProps {
   onProductSelect?: (product: MenuItem) => void;
   onNavigate?: (path: string) => void;
-  onDeliveryRequest?: () => void; // Nueva prop para manejar pedidos a domicilio
+  onDeliveryRequest?: () => void;
 }
 
 const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDeliveryRequest }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [showConversationList, setShowConversationList] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -31,6 +41,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+
+  // Get active conversation
+  const activeConversation = conversations.find(conv => conv.id === activeConversationId);
+  const messages = activeConversation?.messages || [];
 
   // Initialize speech recognition and synthesis
   useEffect(() => {
@@ -64,28 +78,44 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
       synthRef.current = window.speechSynthesis;
     }
 
-    // Welcome message when first opened
-    if (isOpen && messages.length === 0) {
-      addBotMessage(
-        "¡Hola! 👋 Soy tu asistente virtual de Parrilleros. Puedo ayudarte a hacer tu pedido más rápido. ¿Qué te gustaría ordenar hoy?",
-        [
-          "Ver hamburguesas clásicas",
-          "Mostrar bebidas",
-          "Quiero una hamburguesa especial",
-          "Ver mi carrito"
-        ]
-      );
+    // Load conversations from localStorage
+    const savedConversations = localStorage.getItem('parrilleros-conversations');
+    if (savedConversations) {
+      const parsed = JSON.parse(savedConversations);
+      const conversationsWithDates = parsed.map((conv: any) => ({
+        ...conv,
+        createdAt: new Date(conv.createdAt),
+        lastActivity: new Date(conv.lastActivity),
+        messages: conv.messages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }))
+      }));
+      setConversations(conversationsWithDates);
     }
-  }, [isOpen]);
+  }, []);
+
+  // Save conversations to localStorage
+  useEffect(() => {
+    if (conversations.length > 0) {
+      localStorage.setItem('parrilleros-conversations', JSON.stringify(conversations));
+    }
+  }, [conversations]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Create new conversation when first opened
+  useEffect(() => {
+    if (isOpen && conversations.length === 0) {
+      createNewConversation();
+    }
+  }, [isOpen]);
+
   const speak = (text: string) => {
     if (synthRef.current && 'speechSynthesis' in window) {
-      // Cancel any ongoing speech
       synthRef.current.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
@@ -93,7 +123,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
       utterance.rate = 0.9;
       utterance.pitch = 1;
       
-      // Try to find a Spanish voice
       const voices = synthRef.current.getVoices();
       const spanishVoice = voices.find(voice => voice.lang.startsWith('es'));
       if (spanishVoice) {
@@ -104,7 +133,67 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
     }
   };
 
+  const createNewConversation = () => {
+    const newConversation: Conversation = {
+      id: Date.now().toString(),
+      title: `Conversación ${conversations.length + 1}`,
+      messages: [],
+      createdAt: new Date(),
+      lastActivity: new Date()
+    };
+
+    setConversations(prev => [newConversation, ...prev]);
+    setActiveConversationId(newConversation.id);
+    setShowConversationList(false);
+
+    // Add welcome message
+    setTimeout(() => {
+      addBotMessage(
+        "¡Hola! 👋 Soy tu asistente virtual de Parrilleros. Puedo ayudarte a hacer tu pedido más rápido. ¿Qué te gustaría ordenar hoy?",
+        [
+          "Ver hamburguesas clásicas",
+          "Mostrar bebidas",
+          "Quiero una hamburguesa especial",
+          "Ver mi carrito"
+        ]
+      );
+    }, 500);
+  };
+
+  const deleteConversation = (conversationId: string) => {
+    setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+    
+    if (activeConversationId === conversationId) {
+      const remaining = conversations.filter(conv => conv.id !== conversationId);
+      if (remaining.length > 0) {
+        setActiveConversationId(remaining[0].id);
+      } else {
+        setActiveConversationId(null);
+        createNewConversation();
+      }
+    }
+  };
+
+  const switchConversation = (conversationId: string) => {
+    setActiveConversationId(conversationId);
+    setShowConversationList(false);
+  };
+
+  const updateConversationTitle = (conversationId: string, firstUserMessage: string) => {
+    const title = firstUserMessage.length > 30 
+      ? firstUserMessage.substring(0, 30) + '...' 
+      : firstUserMessage;
+    
+    setConversations(prev => prev.map(conv => 
+      conv.id === conversationId 
+        ? { ...conv, title }
+        : conv
+    ));
+  };
+
   const addBotMessage = (content: string, suggestions?: string[], products?: MenuItem[]) => {
+    if (!activeConversationId) return;
+
     setIsTyping(true);
     
     setTimeout(() => {
@@ -117,15 +206,24 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
         products
       };
       
-      setMessages(prev => [...prev, newMessage]);
+      setConversations(prev => prev.map(conv => 
+        conv.id === activeConversationId 
+          ? { 
+              ...conv, 
+              messages: [...conv.messages, newMessage],
+              lastActivity: new Date()
+            }
+          : conv
+      ));
       setIsTyping(false);
       
-      // Speak the bot response
       speak(content);
     }, 1000);
   };
 
   const addUserMessage = (content: string) => {
+    if (!activeConversationId) return;
+
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       type: 'user',
@@ -133,7 +231,23 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
       timestamp: new Date()
     };
     
-    setMessages(prev => [...prev, newMessage]);
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === activeConversationId) {
+        const updatedConv = { 
+          ...conv, 
+          messages: [...conv.messages, newMessage],
+          lastActivity: new Date()
+        };
+        
+        // Update title if this is the first user message
+        if (conv.messages.filter(msg => msg.type === 'user').length === 0) {
+          updatedConv.title = content.length > 30 ? content.substring(0, 30) + '...' : content;
+        }
+        
+        return updatedConv;
+      }
+      return conv;
+    }));
   };
 
   const processUserInput = (input: string) => {
@@ -152,7 +266,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
           []
         );
         
-        // Close chatbot and trigger delivery flow
         setTimeout(() => {
           setIsOpen(false);
           if (onDeliveryRequest) {
@@ -221,7 +334,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
       }
     }
     else if (lowerInput.includes('precio') || lowerInput.includes('cuesta') || lowerInput.includes('vale')) {
-      // Extract product name and search for price
       const productName = lowerInput.replace(/precio|cuesta|vale|cuanto|de|la|el/g, '').trim();
       const product = menuItems.find(item => 
         item.name.toLowerCase().includes(productName) ||
@@ -250,7 +362,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
       );
     }
     else {
-      // General search
       const searchResults = menuItems.filter(item =>
         item.name.toLowerCase().includes(lowerInput) ||
         item.description.toLowerCase().includes(lowerInput)
@@ -285,7 +396,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
   };
 
   const handleProductSelect = (product: MenuItem) => {
-    addToCart(product, 1, [], false, '');
+    if (onProductSelect) {
+      onProductSelect(product);
+    } else {
+      addToCart(product, 1, [], false, '');
+    }
     addBotMessage(
       `¡Perfecto! He agregado "${product.name}" a tu carrito. ¿Quieres agregar algo más?`,
       ["Ver mi carrito", "Agregar bebida", "Pedir a domicilio", "Seguir comprando"]
@@ -315,6 +430,30 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('es-ES', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Hoy';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Ayer';
+    } else {
+      return date.toLocaleDateString('es-ES', { 
+        day: '2-digit', 
+        month: '2-digit' 
+      });
+    }
+  };
+
   return (
     <>
       {/* Chat Button */}
@@ -338,7 +477,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
             </>
           )}
           
-          {/* Notification badge for cart items */}
           {cartItemCount > 0 && !isOpen && (
             <div className="absolute -top-2 -left-2 w-6 h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
               <span className="text-white text-xs font-bold">{cartItemCount}</span>
@@ -362,147 +500,223 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                   <p className="text-sm opacity-90">Tu ayudante para pedidos rápidos</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-white/20 rounded-full transition-colors"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Conversations Button */}
+                <button
+                  onClick={() => setShowConversationList(!showConversationList)}
+                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                  title="Ver conversaciones"
+                >
+                  <MessageSquare size={18} />
+                </button>
+                {/* New Conversation Button */}
+                <button
+                  onClick={createNewConversation}
+                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                  title="Nueva conversación"
+                >
+                  <Plus size={18} />
+                </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 chatbot-messages">
-            {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 rounded-2xl chatbot-message-animation ${
-                  message.type === 'user' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  <p className="text-sm whitespace-pre-line">{message.content}</p>
-                  
-                  {/* Suggestions */}
-                  {message.suggestions && (
-                    <div className="mt-3 space-y-2">
-                      {message.suggestions.map((suggestion, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          className="block w-full text-left p-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs transition-colors chatbot-button"
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Products */}
-                  {message.products && (
-                    <div className="mt-3 space-y-2">
-                      {message.products.map((product) => (
-                        <div key={product.id} className="bg-white rounded-lg p-3 border chatbot-product-card">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <h4 className="font-medium text-gray-800 text-sm">{product.name}</h4>
-                              <p className="text-[#FF8C00] font-bold text-sm">${product.price.toLocaleString()}</p>
-                            </div>
-                            <button
-                              onClick={() => handleProductSelect(product)}
-                              className="ml-2 p-2 bg-[#FF8C00] text-white rounded-full hover:bg-orange-600 transition-colors chatbot-button"
-                            >
-                              <ShoppingCart size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            
-            {/* Typing indicator */}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 p-3 rounded-2xl chatbot-typing-indicator">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex items-center space-x-2">
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Escribe tu pedido o pregunta..."
-                  className="w-full p-3 pr-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-                
-                {/* Voice input button */}
-                {speechSupported && (
-                  <button
-                    onClick={isListening ? stopListening : startListening}
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full transition-colors ${
-                      isListening 
-                        ? 'bg-red-500 text-white animate-pulse chatbot-voice-recording' 
-                        : 'text-gray-400 hover:text-gray-600'
-                    }`}
-                  >
-                    {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-                  </button>
-                )}
+          {/* Conversation List */}
+          {showConversationList ? (
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="mb-4">
+                <h4 className="font-bold text-gray-800 mb-2">Conversaciones</h4>
+                <button
+                  onClick={createNewConversation}
+                  className="w-full p-3 bg-blue-50 hover:bg-blue-100 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium transition-colors flex items-center justify-center"
+                >
+                  <Plus size={16} className="mr-2" />
+                  Nueva conversación
+                </button>
               </div>
               
-              <button
-                onClick={handleSendMessage}
-                disabled={!inputValue.trim()}
-                className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors chatbot-button"
-              >
-                <Send size={16} />
-              </button>
+              <div className="space-y-2">
+                {conversations.map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${
+                      activeConversationId === conversation.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div 
+                        className="flex-1 min-w-0"
+                        onClick={() => switchConversation(conversation.id)}
+                      >
+                        <h5 className="font-medium text-gray-800 truncate">
+                          {conversation.title}
+                        </h5>
+                        <div className="flex items-center text-xs text-gray-500 mt-1">
+                          <Clock size={12} className="mr-1" />
+                          <span>{formatDate(conversation.lastActivity)} {formatTime(conversation.lastActivity)}</span>
+                          <span className="mx-2">•</span>
+                          <span>{conversation.messages.length} mensajes</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteConversation(conversation.id);
+                        }}
+                        className="ml-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                        title="Eliminar conversación"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            
-            {/* Quick actions */}
-            <div className="flex flex-wrap gap-2 mt-3">
-              <button
-                onClick={() => handleSuggestionClick("Ver hamburguesas")}
-                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
-              >
-                🍔 Hamburguesas
-              </button>
-              <button
-                onClick={() => handleSuggestionClick("Ver bebidas")}
-                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
-              >
-                🥤 Bebidas
-              </button>
-              <button
-                onClick={() => handleSuggestionClick("Ver mi carrito")}
-                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
-              >
-                🛒 Mi carrito {cartItemCount > 0 && `(${cartItemCount})`}
-              </button>
-              <button
-                onClick={() => handleSuggestionClick("Pedir a domicilio")}
-                className="px-3 py-1 bg-[#FF8C00] hover:bg-orange-600 text-white rounded-full text-xs transition-colors chatbot-button"
-              >
-                🛵 Domicilio
-              </button>
-            </div>
-          </div>
+          ) : (
+            <>
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 chatbot-messages">
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] p-3 rounded-2xl chatbot-message-animation ${
+                      message.type === 'user' 
+                        ? 'bg-blue-500 text-white' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      <p className="text-sm whitespace-pre-line">{message.content}</p>
+                      
+                      {/* Suggestions */}
+                      {message.suggestions && (
+                        <div className="mt-3 space-y-2">
+                          {message.suggestions.map((suggestion, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleSuggestionClick(suggestion)}
+                              className="block w-full text-left p-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs transition-colors chatbot-button"
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Products */}
+                      {message.products && (
+                        <div className="mt-3 space-y-2">
+                          {message.products.map((product) => (
+                            <div key={product.id} className="bg-white rounded-lg p-3 border chatbot-product-card">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-800 text-sm">{product.name}</h4>
+                                  <p className="text-[#FF8C00] font-bold text-sm">${product.price.toLocaleString()}</p>
+                                </div>
+                                <button
+                                  onClick={() => handleProductSelect(product)}
+                                  className="ml-2 p-2 bg-[#FF8C00] text-white rounded-full hover:bg-orange-600 transition-colors chatbot-button"
+                                >
+                                  <ShoppingCart size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Typing indicator */}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 p-3 rounded-2xl chatbot-typing-indicator">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input */}
+              <div className="p-4 border-t border-gray-200">
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Escribe tu pedido o pregunta..."
+                      className="w-full p-3 pr-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                    
+                    {/* Voice input button */}
+                    {speechSupported && (
+                      <button
+                        onClick={isListening ? stopListening : startListening}
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full transition-colors ${
+                          isListening 
+                            ? 'bg-red-500 text-white animate-pulse chatbot-voice-recording' 
+                            : 'text-gray-400 hover:text-gray-600'
+                        }`}
+                      >
+                        {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                      </button>
+                    )}
+                  </div>
+                  
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!inputValue.trim()}
+                    className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors chatbot-button"
+                  >
+                    <Send size={16} />
+                  </button>
+                </div>
+                
+                {/* Quick actions */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <button
+                    onClick={() => handleSuggestionClick("Ver hamburguesas")}
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
+                  >
+                    🍔 Hamburguesas
+                  </button>
+                  <button
+                    onClick={() => handleSuggestionClick("Ver bebidas")}
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
+                  >
+                    🥤 Bebidas
+                  </button>
+                  <button
+                    onClick={() => handleSuggestionClick("Ver mi carrito")}
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
+                  >
+                    🛒 Mi carrito {cartItemCount > 0 && `(${cartItemCount})`}
+                  </button>
+                  <button
+                    onClick={() => handleSuggestionClick("Pedir a domicilio")}
+                    className="px-3 py-1 bg-[#FF8C00] hover:bg-orange-600 text-white rounded-full text-xs transition-colors chatbot-button"
+                  >
+                    🛵 Domicilio
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </>
