@@ -56,6 +56,11 @@ const CartPage: React.FC = () => {
     navigate(path);
   };
 
+  // Handle delivery request from chatbot
+  const handleChatBotDeliveryRequest = () => {
+    setShowDeliveryForm(true);
+  };
+
   if (showDeliveryForm) {
     return <DeliveryForm onBack={handleBackFromDelivery} />;
   }
@@ -101,8 +106,11 @@ const CartPage: React.FC = () => {
           />
         )}
 
-        {/* ChatBot - Available in cart page */}
-        <ChatBot onNavigate={handleChatBotNavigate} />
+        {/* ChatBot - Available in cart page with delivery support */}
+        <ChatBot 
+          onNavigate={handleChatBotNavigate} 
+          onDeliveryRequest={handleChatBotDeliveryRequest}
+        />
       </div>
     </Layout>
   );

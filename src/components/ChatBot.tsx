@@ -16,9 +16,10 @@ interface ChatMessage {
 interface ChatBotProps {
   onProductSelect?: (product: MenuItem) => void;
   onNavigate?: (path: string) => void;
+  onDeliveryRequest?: () => void; // Nueva prop para manejar pedidos a domicilio
 }
 
-const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
+const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDeliveryRequest }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -138,6 +139,32 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
   const processUserInput = (input: string) => {
     const lowerInput = input.toLowerCase().trim();
     
+    // Handle delivery requests
+    if (lowerInput.includes('domicilio') || lowerInput.includes('entrega') || lowerInput.includes('delivery')) {
+      if (cart.length === 0) {
+        addBotMessage(
+          "Para pedir a domicilio necesitas tener productos en tu carrito. ¿Te ayudo a agregar algo?",
+          ["Ver hamburguesas", "Ver bebidas", "Ver acompañamientos"]
+        );
+      } else {
+        addBotMessage(
+          "¡Perfecto! Te voy a redirigir al formulario de domicilio para completar tu pedido. 🛵",
+          []
+        );
+        
+        // Close chatbot and trigger delivery flow
+        setTimeout(() => {
+          setIsOpen(false);
+          if (onDeliveryRequest) {
+            onDeliveryRequest();
+          } else if (onNavigate) {
+            onNavigate('/cart');
+          }
+        }, 1500);
+      }
+      return;
+    }
+    
     // Search for products
     if (lowerInput.includes('hamburguesa') || lowerInput.includes('burger')) {
       const burgers = menuItems.filter(item => 
@@ -212,8 +239,8 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
     }
     else if (lowerInput.includes('ayuda') || lowerInput.includes('help')) {
       addBotMessage(
-        "¡Por supuesto! Puedo ayudarte con:\n\n• Buscar productos por nombre\n• Mostrar categorías (hamburguesas, bebidas, etc.)\n• Ver precios\n• Revisar tu carrito\n• Hacer pedidos rápidos\n\n¿Qué necesitas?",
-        ["Ver hamburguesas", "Ver bebidas", "Ver mi carrito", "Hacer pedido rápido"]
+        "¡Por supuesto! Puedo ayudarte con:\n\n• Buscar productos por nombre\n• Mostrar categorías (hamburguesas, bebidas, etc.)\n• Ver precios\n• Revisar tu carrito\n• Hacer pedidos rápidos\n• Pedir a domicilio\n\n¿Qué necesitas?",
+        ["Ver hamburguesas", "Ver bebidas", "Ver mi carrito", "Pedir a domicilio"]
       );
     }
     else if (lowerInput.includes('hola') || lowerInput.includes('buenos') || lowerInput.includes('buenas')) {
@@ -345,10 +372,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 chatbot-messages">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 rounded-2xl ${
+                <div className={`max-w-[80%] p-3 rounded-2xl chatbot-message-animation ${
                   message.type === 'user' 
                     ? 'bg-blue-500 text-white' 
                     : 'bg-gray-100 text-gray-800'
@@ -362,7 +389,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
                         <button
                           key={index}
                           onClick={() => handleSuggestionClick(suggestion)}
-                          className="block w-full text-left p-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs transition-colors"
+                          className="block w-full text-left p-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs transition-colors chatbot-button"
                         >
                           {suggestion}
                         </button>
@@ -374,7 +401,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
                   {message.products && (
                     <div className="mt-3 space-y-2">
                       {message.products.map((product) => (
-                        <div key={product.id} className="bg-white rounded-lg p-3 border">
+                        <div key={product.id} className="bg-white rounded-lg p-3 border chatbot-product-card">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-800 text-sm">{product.name}</h4>
@@ -382,7 +409,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
                             </div>
                             <button
                               onClick={() => handleProductSelect(product)}
-                              className="ml-2 p-2 bg-[#FF8C00] text-white rounded-full hover:bg-orange-600 transition-colors"
+                              className="ml-2 p-2 bg-[#FF8C00] text-white rounded-full hover:bg-orange-600 transition-colors chatbot-button"
                             >
                               <ShoppingCart size={14} />
                             </button>
@@ -398,7 +425,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
             {/* Typing indicator */}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 p-3 rounded-2xl">
+                <div className="bg-gray-100 p-3 rounded-2xl chatbot-typing-indicator">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -430,7 +457,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
                     onClick={isListening ? stopListening : startListening}
                     className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full transition-colors ${
                       isListening 
-                        ? 'bg-red-500 text-white animate-pulse' 
+                        ? 'bg-red-500 text-white animate-pulse chatbot-voice-recording' 
                         : 'text-gray-400 hover:text-gray-600'
                     }`}
                   >
@@ -442,7 +469,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim()}
-                className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors chatbot-button"
               >
                 <Send size={16} />
               </button>
@@ -452,21 +479,27 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate }) => {
             <div className="flex flex-wrap gap-2 mt-3">
               <button
                 onClick={() => handleSuggestionClick("Ver hamburguesas")}
-                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors"
+                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
               >
                 🍔 Hamburguesas
               </button>
               <button
                 onClick={() => handleSuggestionClick("Ver bebidas")}
-                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors"
+                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
               >
                 🥤 Bebidas
               </button>
               <button
                 onClick={() => handleSuggestionClick("Ver mi carrito")}
-                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors"
+                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors chatbot-button"
               >
                 🛒 Mi carrito {cartItemCount > 0 && `(${cartItemCount})`}
+              </button>
+              <button
+                onClick={() => handleSuggestionClick("Pedir a domicilio")}
+                className="px-3 py-1 bg-[#FF8C00] hover:bg-orange-600 text-white rounded-full text-xs transition-colors chatbot-button"
+              >
+                🛵 Domicilio
               </button>
             </div>
           </div>
