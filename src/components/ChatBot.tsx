@@ -127,19 +127,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
     }
   }, [isOpen]);
 
-  // Prevent body scroll when chat is open on mobile
-  useEffect(() => {
-    if (isMobile && isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMobile, isOpen]);
-
   const speak = (text: string) => {
     if (synthRef.current && 'speechSynthesis' in window) {
       synthRef.current.cancel();
@@ -480,60 +467,31 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
     }
   };
 
-  // Responsive dimensions and positioning
-  const chatDimensions = isMobile 
-    ? {
-        position: 'fixed inset-0',
-        width: 'w-full',
-        height: 'h-full',
-        borderRadius: 'rounded-none',
-        bottom: 'bottom-0',
-        right: 'right-0',
-        margin: 'm-0'
-      }
-    : {
-        position: 'fixed',
-        width: 'w-80 sm:w-96',
-        height: 'h-[500px] sm:h-[600px]',
-        borderRadius: 'rounded-2xl',
-        bottom: 'bottom-20 sm:bottom-24',
-        right: 'right-2 sm:right-6',
-        margin: 'm-0'
-      };
-
-  const buttonSize = isMobile 
-    ? 'w-16 h-16 sm:w-14 sm:h-14'
-    : 'w-14 h-14';
-
-  const buttonPosition = isMobile
-    ? 'bottom-4 right-4 sm:bottom-6 sm:right-6'
-    : 'bottom-6 right-6';
-
   return (
     <>
       {/* Chat Button */}
-      <div className={`fixed ${buttonPosition} z-50`}>
+      <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`relative flex items-center justify-center ${buttonSize} rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${
+          className={`relative flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${
             isOpen 
               ? 'bg-red-500 hover:bg-red-600' 
               : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
           }`}
         >
           {isOpen ? (
-            <X size={isMobile ? 28 : 24} className="text-white" />
+            <X size={24} className="text-white" />
           ) : (
             <>
-              <MessageCircle size={isMobile ? 28 : 24} className="text-white" />
-              <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
-                <Sparkles size={isMobile ? 10 : 12} className="text-white" />
+              <MessageCircle size={24} className="text-white" />
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
+                <Sparkles size={12} className="text-white" />
               </div>
             </>
           )}
           
           {cartItemCount > 0 && !isOpen && (
-            <div className="absolute -top-2 -left-2 w-5 h-5 sm:w-6 sm:h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
+            <div className="absolute -top-2 -left-2 w-6 h-6 bg-[#FF8C00] rounded-full flex items-center justify-center">
               <span className="text-white text-xs font-bold">{cartItemCount}</span>
             </div>
           )}
@@ -542,13 +500,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
 
       {/* Chat Window */}
       {isOpen && (
-        <div className={`${chatDimensions.position} ${chatDimensions.bottom} ${chatDimensions.right} ${chatDimensions.width} ${chatDimensions.height} ${chatDimensions.borderRadius} ${chatDimensions.margin} bg-white shadow-2xl z-50 flex flex-col border border-gray-200 overflow-hidden`}>
+        <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] sm:h-[600px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col border border-gray-200 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 sm:p-4 text-white flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center min-w-0 flex-1">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
-                  <Sparkles size={isMobile ? 16 : 20} />
+                  <Sparkles size={20} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-bold text-sm sm:text-base truncate">Asistente Parrilleros</h3>
@@ -562,7 +520,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                   className="p-1.5 sm:p-2 hover:bg-white/20 rounded-full transition-colors"
                   title="Ver conversaciones"
                 >
-                  <MessageSquare size={isMobile ? 16 : 18} />
+                  <MessageSquare size={16} />
                 </button>
                 {/* New Conversation Button */}
                 <button
@@ -570,13 +528,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                   className="p-1.5 sm:p-2 hover:bg-white/20 rounded-full transition-colors"
                   title="Nueva conversación"
                 >
-                  <Plus size={isMobile ? 16 : 18} />
+                  <Plus size={16} />
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-1 sm:p-1 hover:bg-white/20 rounded-full transition-colors"
                 >
-                  <X size={isMobile ? 18 : 20} />
+                  <X size={18} />
                 </button>
               </div>
             </div>
@@ -611,13 +569,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ onProductSelect, onNavigate, onDelive
                         className="flex-1 min-w-0"
                         onClick={() => switchConversation(conversation.id)}
                       >
-                        <h5 className="font-medium text-gray-800 truncate text-sm sm:text-base">
+                        <h5 className="font-medium text-gray-800 truncate text-sm">
                           {conversation.title}
                         </h5>
                         <div className="flex items-center text-xs text-gray-500 mt-1">
                           <Clock size={10} className="mr-1" />
                           <span>{formatDate(conversation.lastActivity)} {formatTime(conversation.lastActivity)}</span>
-                          <span className="mx-1 sm:mx-2">•</span>
+                          <span className="mx-1">•</span>
                           <span>{conversation.messages.length} mensajes</span>
                         </div>
                       </div>
