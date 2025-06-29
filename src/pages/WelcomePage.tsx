@@ -74,13 +74,13 @@ const WelcomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tour Button - Pequeño y discreto en esquina superior derecha */}
+      {/* Tour Button - Pequeño y discreto en esquina inferior izquierda */}
       {showTourButton && (
         <TourButton 
           onStartTour={handleStartTour}
           variant="floating"
           size="sm"
-          className="top-6 right-6 pointer-events-auto"
+          className="bottom-6 left-6 pointer-events-auto"
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             handleStartTour();

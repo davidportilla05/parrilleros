@@ -86,13 +86,13 @@ const CartPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Tour Button - Pequeño en esquina superior derecha */}
+        {/* Tour Button - Pequeño en esquina inferior izquierda */}
         {showTourButton && cart.length > 0 && (
           <TourButton 
             onStartTour={handleStartTour}
             variant="floating"
             size="sm"
-            className="top-6 right-6"
+            className="bottom-6 left-6"
           />
         )}
       </div>
