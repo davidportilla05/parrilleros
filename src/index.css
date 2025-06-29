@@ -1,12 +1,10 @@
+/* Import fonts first - before Tailwind directives */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import HEAVYRUST font */
-@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
-
-/* Import BEBAS NEUE font for FAST FOOD */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
 /* Custom HEAVYRUST-style font class */
 .font-heavyrust {
