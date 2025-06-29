@@ -46,6 +46,32 @@ const MenuPage: React.FC = () => {
     }
   });
 
+  // Filter items based on category and search query - MOVED BEFORE useEffect
+  const filteredItems = useMemo(() => {
+    let items = menuItems.filter((item) => item.category === selectedCategory);
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      items = items.filter((item) =>
+        item.name.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query)
+      );
+    }
+    
+    return items;
+  }, [selectedCategory, searchQuery]);
+
+  // Global search across all items - MOVED BEFORE useEffect
+  const globalSearchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    
+    const query = searchQuery.toLowerCase().trim();
+    return menuItems.filter((item) =>
+      item.name.toLowerCase().includes(query) ||
+      item.description.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
   // Auto-start tour for first-time users
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('parrilleros-menu-tour-seen');
@@ -177,32 +203,6 @@ const MenuPage: React.FC = () => {
       });
     }
   }, [cart.length]);
-  
-  // Filter items based on category and search query
-  const filteredItems = useMemo(() => {
-    let items = menuItems.filter((item) => item.category === selectedCategory);
-    
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      items = items.filter((item) =>
-        item.name.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query)
-      );
-    }
-    
-    return items;
-  }, [selectedCategory, searchQuery]);
-
-  // Global search across all items
-  const globalSearchResults = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    
-    const query = searchQuery.toLowerCase().trim();
-    return menuItems.filter((item) =>
-      item.name.toLowerCase().includes(query) ||
-      item.description.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
 
   const sides = menuItems.filter((item) => item.category === 'sides');
   const drinks = menuItems.filter((item) => item.category === 'drinks');
