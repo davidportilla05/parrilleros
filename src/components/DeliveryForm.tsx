@@ -67,24 +67,74 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
       setIsSubmitting(false);
       setOrderSubmitted(true);
 
-      // Construct WhatsApp message
-      const cartDetails = cart
-        .map(item => `${item.menuItem.name} x${item.quantity} - $${(item.menuItem.price * item.quantity).toLocaleString()}`)
-        .join('\n');
-      
-      const message = `🍔 *NUEVO PEDIDO DOMICILIO* #${orderNumber.toString().padStart(3, '0')}\n\n` +
-                      `📍 *SEDE:* ${selectedLocation.name}\n` +
-                      `📍 *Dirección sede:* ${selectedLocation.address}\n\n` +
-                      `👤 *Cliente:* ${formData.name}\n` +
-                      `📍 *Dirección entrega:* ${formData.address}, ${formData.neighborhood}\n` +
-                      `📱 *Teléfono:* ${formData.phone}\n` +
-                      `🪪 *Cédula:* ${formData.cedula}\n` +
-                      `📧 *Correo:* ${formData.email}\n` +
-                      `💳 *Forma de pago:* ${formData.paymentMethod}\n\n` +
-                      `🛒 *PRODUCTOS:*\n${cartDetails}\n\n` +
-                      `💰 *TOTAL:* $${Math.round(total).toLocaleString()}\n\n` +
-                      `⏰ *Hora del pedido:* ${new Date().toLocaleTimeString()}\n` +
-                      `📅 *Fecha:* ${new Date().toLocaleDateString()}`;
+      // Calculate costs
+      const subtotal = total * 0.92;
+      const iva = total * 0.08;
+
+      // Construct detailed cart information
+      const cartDetails = cart.map((item, index) => {
+        const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
+        const customizationsTotal = item.customizations.reduce((sum, option) => sum + option.price, 0);
+        const itemSubtotal = (basePrice + customizationsTotal) * item.quantity;
+        
+        let itemText = `${index + 1}. ${item.menuItem.name}`;
+        if (item.withFries) {
+          itemText += ' + Papas';
+        }
+        itemText += `\n   • Cantidad: ${item.quantity}`;
+        itemText += `\n   • Precio unitario: $${basePrice.toLocaleString()}`;
+        
+        if (item.customizations.length > 0) {
+          itemText += `\n   • Personalizaciones: ${item.customizations.map(c => c.name.replace('AD ', '')).join(', ')}`;
+          itemText += `\n   • Costo personalizaciones: $${customizationsTotal.toLocaleString()}`;
+        }
+        
+        if (item.specialInstructions) {
+          itemText += `\n   • Instrucciones: ${item.specialInstructions}`;
+        }
+        
+        itemText += `\n   • Subtotal: $${Math.round(itemSubtotal).toLocaleString()}`;
+        
+        return itemText;
+      }).join('\n\n');
+
+      // Construct WhatsApp message with exact format
+      const message = `🍔 NUEVO PEDIDO DOMICILIO - PARRILLEROS
+═══════════════════════════════════════
+
+📋 INFORMACIÓN DEL PEDIDO
+* Número de orden: #${orderNumber.toString().padStart(3, '0')}
+* Fecha y hora: ${new Date().toLocaleDateString()}, ${new Date().toLocaleTimeString()}
+* Total: $${Math.round(total).toLocaleString()}
+
+👤 INFORMACIÓN DEL CLIENTE
+* Nombre: ${formData.name}
+* Cédula: ${formData.cedula}
+* Teléfono: ${formData.phone}
+* Email: ${formData.email}
+
+📍 DIRECCIÓN DE ENTREGA
+* Dirección: ${formData.address}
+* Barrio: ${formData.neighborhood}
+
+💳 FORMA DE PAGO
+* ${formData.paymentMethod}
+
+🛒 DETALLE DEL PEDIDO
+${cartDetails}
+
+💰 RESUMEN DE COSTOS
+* Subtotal: $${Math.round(subtotal).toLocaleString()}
+* IVA (8%): $${Math.round(iva).toLocaleString()}
+* TOTAL: $${Math.round(total).toLocaleString()}
+
+⏰ TIEMPO ESTIMADO: 45-60 minutos
+
+¡Procesar inmediatamente!
+
+📍 SEDE RESPONSABLE: ${selectedLocation.name}
+📞 Teléfono sede: ${selectedLocation.phone}
+🏠 Dirección sede: ${selectedLocation.address}`;
       
       // Encode message and create WhatsApp URL with selected location's WhatsApp
       const encodedMessage = encodeURIComponent(message);
