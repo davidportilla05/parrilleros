@@ -42,7 +42,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, placeholder = "Buscar p
         )}
         
         {/* Subtle gradient border effect */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FF8C00]/10 to-orange-300/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none -z-10">hola</div>
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FF8C00]/10 to-orange-300/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none -z-10"></div>
       </div>
       
       {/* Search suggestions hint */}
