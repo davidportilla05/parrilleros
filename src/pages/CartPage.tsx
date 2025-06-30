@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import TourButton from '../components/TourButton';
-import ChatBot from '../components/ChatBot';
 import { useOrder } from '../context/OrderContext';
 import OrderSummary from '../components/OrderSummary';
 import DeliveryForm from '../components/DeliveryForm';
@@ -52,15 +51,6 @@ const CartPage: React.FC = () => {
     startTour();
   };
 
-  const handleChatBotNavigate = (path: string) => {
-    navigate(path);
-  };
-
-  // Handle delivery request from chatbot
-  const handleChatBotDeliveryRequest = () => {
-    setShowDeliveryForm(true);
-  };
-
   if (showDeliveryForm) {
     return <DeliveryForm onBack={handleBackFromDelivery} />;
   }
@@ -105,12 +95,6 @@ const CartPage: React.FC = () => {
             className="bottom-6 left-6"
           />
         )}
-
-        {/* ChatBot - Available in cart page with delivery support */}
-        <ChatBot 
-          onNavigate={handleChatBotNavigate} 
-          onDeliveryRequest={handleChatBotDeliveryRequest}
-        />
       </div>
     </Layout>
   );

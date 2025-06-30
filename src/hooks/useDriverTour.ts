@@ -107,7 +107,7 @@ export const welcomeTourSteps: TourStep[] = [
     element: 'body',
     popover: {
       title: '🍔 ¡Bienvenido a Parrilleros!',
-      description: 'Te guiaremos paso a paso para hacer tu pedido de forma fácil y rápida. También puedes usar nuestro asistente virtual (botón azul) para pedidos más rápidos. ¡Empecemos!',
+      description: 'Te guiaremos paso a paso para hacer tu pedido de forma fácil y rápida. ¡Empecemos!',
       side: 'bottom'
     }
   }
@@ -126,7 +126,7 @@ export const menuTourSteps: TourStep[] = [
     element: '[data-tour="search-bar"]',
     popover: {
       title: '🔍 Barra de Búsqueda',
-      description: 'Busca rápidamente hamburguesas, bebidas o acompañamientos escribiendo aquí. También puedes usar el chatbot para búsquedas por voz.',
+      description: 'Busca rápidamente hamburguesas, bebidas o acompañamientos escribiendo aquí.',
       side: 'bottom'
     }
   },
@@ -142,7 +142,7 @@ export const menuTourSteps: TourStep[] = [
     element: '[data-tour="menu-grid"]',
     popover: {
       title: '🍽️ Menú de Productos',
-      description: 'Aquí verás todos los productos disponibles. Toca cualquier producto para personalizarlo o usa el chatbot para pedidos rápidos.',
+      description: 'Aquí verás todos los productos disponibles. Toca cualquier producto para personalizarlo.',
       side: 'top'
     }
   },
@@ -161,7 +161,7 @@ export const cartTourSteps: TourStep[] = [
     element: '[data-tour="order-summary"]',
     popover: {
       title: '📋 Resumen del Pedido',
-      description: 'Aquí puedes revisar todos los productos que has agregado y el total a pagar. También puedes usar el chatbot para modificar tu pedido.',
+      description: 'Aquí puedes revisar todos los productos que has agregado y el total a pagar.',
       side: 'right'
     }
   },
@@ -177,7 +177,7 @@ export const cartTourSteps: TourStep[] = [
     element: '[data-tour="add-more-button"]',
     popover: {
       title: '➕ Agregar Más Productos',
-      description: 'Si quieres agregar más productos a tu pedido, usa este botón o pregúntale al chatbot.',
+      description: 'Si quieres agregar más productos a tu pedido, usa este botón.',
       side: 'top'
     }
   }

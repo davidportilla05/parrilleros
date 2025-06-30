@@ -4,10 +4,17 @@ export const locations: Location[] = [
   {
     id: 'sede-tamasagra',
     name: 'Parrilleros Tamasagra',
-    address: 'Manzana 9A casa 1 - Tamasagra',
-    phone: '3012222098',
+    address: 'Calle 18 #25-45, Centro',
+    phone: '(602) 555-0101',
     whatsapp: '+573186025827',
-    neighborhood: 'Centro'
+    neighborhood: 'Centro',
+    deliveryZones: [
+      'Centro',
+      'La Merced',
+      'San Antonio',
+      'El Calvario',
+      'Las Nieves'
+    ]
   },
   {
     id: 'sede-san ignacio',

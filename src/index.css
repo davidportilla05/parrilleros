@@ -272,61 +272,6 @@
   background: rgba(37, 99, 235, 0.95) !important;
 }
 
-/* ChatBot Styles */
-.chatbot-message-animation {
-  animation: slideInUp 0.3s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.chatbot-typing-indicator {
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-.chatbot-voice-recording {
-  animation: voicePulse 1s ease-in-out infinite;
-}
-
-@keyframes voicePulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-  }
-}
-
-/* ChatBot button hover effects */
-.chatbot-button {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.chatbot-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
-/* ChatBot product card animations */
-.chatbot-product-card {
-  transition: all 0.2s ease-in-out;
-}
-
-.chatbot-product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
 /* Responsive tour adjustments */
 @media (max-width: 768px) {
   .kiosk-tour-popover {
@@ -355,28 +300,8 @@ html {
 
 /* Performance optimizations for animations */
 .menu-card-container,
-.gsap-animated,
-.chatbot-message-animation {
+.gsap-animated {
   will-change: transform, opacity;
   backface-visibility: hidden;
   transform-style: preserve-3d;
-}
-
-/* Custom scrollbar for chat messages */
-.chatbot-messages::-webkit-scrollbar {
-  width: 4px;
-}
-
-.chatbot-messages::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 2px;
-}
-
-.chatbot-messages::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 2px;
-}
-
-.chatbot-messages::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
 }
