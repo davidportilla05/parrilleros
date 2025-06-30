@@ -24,11 +24,7 @@ export const locations: Location[] = [
     whatsapp: '+573148300987',
     neighborhood: 'San Ignacio',
     deliveryZones: [
-      'Versalles',
-      'Flora Industrial',
-      'San Fernando',
-      'Champagnat',
-      'Los Álamos'
+
     ]
   },
   {
