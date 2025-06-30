@@ -34,10 +34,10 @@ export const locations: Location[] = [
   {
     id: 'sede-las cuadras',
     name: 'Parrilleros Cuadras',
-    address: 'Calle 5 #30-15, Fatima',
-    phone: '(602) 555-0103',
+    address: 'Calle 20 # 31C - 38 - Las Cuadras',
+    phone: '313 341 9733',
     whatsapp: '+573186025829',
-    neighborhood: 'Fatima',
+    neighborhood: 'Las Cuadras',
     deliveryZones: [
       'Fatima',
       'Corazón de Jesús',
