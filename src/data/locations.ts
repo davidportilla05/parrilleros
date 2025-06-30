@@ -39,11 +39,7 @@ export const locations: Location[] = [
     whatsapp: '+573186025829',
     neighborhood: 'Las Cuadras',
     deliveryZones: [
-      'Fatima',
-      'Corazón de Jesús',
-      'Bolivariano',
-      'San Vicente',
-      'Pandiaco'
+ 
     ]
   }
 ];
