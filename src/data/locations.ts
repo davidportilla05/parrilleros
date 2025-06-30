@@ -9,11 +9,7 @@ export const locations: Location[] = [
     whatsapp: '+573186025827',
     neighborhood: 'Tamasagra',
     deliveryZones: [
-      'Centro',
-      'La Merced',
-      'San Antonio',
-      'El Calvario',
-      'Las Nieves'
+
     ]
   },
   {
