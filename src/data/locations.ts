@@ -7,7 +7,14 @@ export const locations: Location[] = [
     address: 'Calle 18 #25-45, Centro',
     phone: '301 222 2098',
     whatsapp: '+573186025827',
-    neighborhood: 'Centro'
+    neighborhood: 'Tamasagra',
+    deliveryZones: [
+      'Centro',
+      'La Merced',
+      'San Antonio',
+      'El Calvario',
+      'Las Nieves'
+    ]
   },
   {
     id: 'sede-san ignacio',
