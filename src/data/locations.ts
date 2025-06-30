@@ -19,10 +19,10 @@ export const locations: Location[] = [
   {
     id: 'sede-san ignacio',
     name: 'Parrilleros San Ignacio',
-    address: 'Carrera 15 #45-20, Versalles',
-    phone: '(602) 555-0102',
+    address: 'Cra 32 # 14 - 84 - San Ignacio',
+    phone: '316 606 0005',
     whatsapp: '+573148300987',
-    neighborhood: 'Versalles',
+    neighborhood: 'San Ignacio',
     deliveryZones: [
       'Versalles',
       'Flora Industrial',
