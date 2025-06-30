@@ -4,7 +4,7 @@ export const locations: Location[] = [
   {
     id: 'sede-tamasagra',
     name: 'Parrilleros Tamasagra',
-    address: 'Calle 18 #25-45, Centro',
+    address: 'Manzana 9A casa 1 - Tamasagra',
     phone: '301 222 2098',
     whatsapp: '+573186025827',
     neighborhood: 'Tamasagra',
