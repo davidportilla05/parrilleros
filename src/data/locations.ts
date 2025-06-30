@@ -20,7 +20,7 @@ export const locations: Location[] = [
     whatsapp: '+573148300987',
     neighborhood: 'San Ignacio',
     deliveryZones: [
-
+      'Cualquier sitio de la ciudad'
     ]
   },
   {
@@ -31,7 +31,7 @@ export const locations: Location[] = [
     whatsapp: '+573186025829',
     neighborhood: 'Las Cuadras',
     deliveryZones: [
- 
+       'Cualquier sitio de la ciudad'
     ]
   }
 ];
