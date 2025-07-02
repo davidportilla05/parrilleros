@@ -86,6 +86,11 @@ const MenuPage: React.FC = () => {
 
   // Animaciones de entrada de la página
   useEffect(() => {
+    // Check if all refs are available before proceeding
+    if (!backButtonRef.current || !searchBarRef.current || !categorySelectorRef.current) {
+      return;
+    }
+
     const tl = gsap.timeline();
 
     // Configurar estados iniciales
@@ -121,19 +126,22 @@ const MenuPage: React.FC = () => {
 
   // Animaciones para las tarjetas del menú
   useEffect(() => {
-    if (menuCardsRefs.current.length > 0) {
+    // Filter out null refs before proceeding
+    const validCards = menuCardsRefs.current.filter(card => card !== null);
+    
+    if (validCards.length > 0) {
       // Limpiar animaciones anteriores
-      gsap.killTweensOf(menuCardsRefs.current);
+      gsap.killTweensOf(validCards);
       
       // Configurar estado inicial
-      gsap.set(menuCardsRefs.current, {
+      gsap.set(validCards, {
         opacity: 0,
         y: 50,
         scale: 0.9
       });
 
       // Animación de entrada escalonada
-      gsap.to(menuCardsRefs.current, {
+      gsap.to(validCards, {
         opacity: 1,
         y: 0,
         scale: 1,
@@ -146,7 +154,7 @@ const MenuPage: React.FC = () => {
       });
 
       // Animaciones con ScrollTrigger para efectos al hacer scroll
-      menuCardsRefs.current.forEach((card, index) => {
+      validCards.forEach((card, index) => {
         if (card) {
           gsap.fromTo(card, 
             {
@@ -254,19 +262,23 @@ const MenuPage: React.FC = () => {
   };
 
   const handleBackButtonHover = () => {
-    gsap.to(backButtonRef.current, {
-      scale: 1.05,
-      duration: 0.3,
-      ease: "power2.out"
-    });
+    if (backButtonRef.current) {
+      gsap.to(backButtonRef.current, {
+        scale: 1.05,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
   };
 
   const handleBackButtonLeave = () => {
-    gsap.to(backButtonRef.current, {
-      scale: 1,
-      duration: 0.3,
-      ease: "power2.out"
-    });
+    if (backButtonRef.current) {
+      gsap.to(backButtonRef.current, {
+        scale: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + item.quantity, 0);
