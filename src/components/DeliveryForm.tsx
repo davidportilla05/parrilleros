@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck, Download, Printer } from 'lucide-react';
+import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck, Download, Printer, Receipt, ExternalLink } from 'lucide-react';
 import { useOrder } from '../context/OrderContext';
 import OrderSummary from './OrderSummary';
 import TourButton from './TourButton';
@@ -51,7 +51,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     phone: '',
     cedula: '',
     email: '',
-    paymentMethod: ''
+    paymentMethod: '',
+    requiresInvoice: false, // Nueva opción para factura
+    dataProcessingAuthorized: false // Nueva opción para autorización de datos
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
@@ -89,7 +91,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     'Daviplata'
   ];
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -110,15 +112,21 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   };
 
   const isFormValid = () => {
-    return selectedLocation &&
+    const basicFieldsValid = selectedLocation &&
            formData.name && 
            formData.address && 
            formData.neighborhood && 
            formData.phone && 
-           formData.cedula && 
-           formData.email && 
            formData.paymentMethod && 
-           cart.length > 0;
+           cart.length > 0 &&
+           formData.dataProcessingAuthorized; // Autorización de datos es obligatoria
+
+    // Si requiere factura, validar campos adicionales
+    if (formData.requiresInvoice) {
+      return basicFieldsValid && formData.cedula && formData.email;
+    }
+
+    return basicFieldsValid;
   };
 
   const generateTicketContent = () => {
@@ -148,14 +156,18 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
       return itemText;
     }).join('\n\n');
 
+    const invoiceInfo = formData.requiresInvoice ? 
+      `\n📄 FACTURA REQUERIDA\nCC: ${formData.cedula} | Email: ${formData.email}` : 
+      '\n📄 Sin factura';
+
     return `🍔 NUEVO PEDIDO DOMICILIO - PARRILLEROS
 ═══════════════════════════════════════
 
 📋 PEDIDO #${orderNumber.toString().padStart(3, '0')} | ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
 
 👤 CLIENTE
-${formData.name} | CC: ${formData.cedula}
-📱 ${formData.phone} | 📧 ${formData.email}
+${formData.name}
+📱 ${formData.phone}${invoiceInfo}
 
 📍 ENTREGA
 ${formData.address}, ${formData.neighborhood}
@@ -304,6 +316,14 @@ ${cartDetails}
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">📍 Dirección:</span>
               <span className="font-medium text-right">{formData.address}, {formData.neighborhood}</span>
+            </div>
+
+            {/* Información de factura */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">📄 Factura:</span>
+              <span className="font-medium text-right">
+                {formData.requiresInvoice ? `Sí - CC: ${formData.cedula}` : 'No requerida'}
+              </span>
             </div>
 
             {/* Desglose de costos corregido - solo IVA */}
@@ -524,35 +544,63 @@ ${cartDetails}
                   />
                 </div>
 
-                {/* Cedula */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <FileText size={16} className="inline mr-2" />
-                    Número de cédula *
+                {/* Invoice Option */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.requiresInvoice}
+                      onChange={(e) => handleInputChange('requiresInvoice', e.target.checked)}
+                      className="w-4 h-4 accent-[#FF8C00] mr-3"
+                    />
+                    <div>
+                      <span className="font-medium text-gray-800 flex items-center">
+                        <Receipt size={16} className="mr-2 text-[#FF8C00]" />
+                        ¿Requiere factura a su nombre?
+                      </span>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Si necesita factura, marque esta opción y complete los campos adicionales
+                      </p>
+                    </div>
                   </label>
-                  <input
-                    type="text"
-                    value={formData.cedula}
-                    onChange={(e) => handleInputChange('cedula', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
-                    placeholder="12345678"
-                  />
                 </div>
 
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Mail size={16} className="inline mr-2" />
-                    Correo electrónico *
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
-                    placeholder="tu@email.com"
-                  />
-                </div>
+                {/* Conditional fields for invoice */}
+                {formData.requiresInvoice && (
+                  <div className="space-y-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-800 mb-3">Datos para facturación</h3>
+                    
+                    {/* Cedula */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <FileText size={16} className="inline mr-2" />
+                        Número de cédula *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.cedula}
+                        onChange={(e) => handleInputChange('cedula', e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
+                        placeholder="12345678"
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <Mail size={16} className="inline mr-2" />
+                        Correo electrónico *
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
+                        placeholder="tu@email.com"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Payment Method */}
                 <div>
@@ -572,6 +620,35 @@ ${cartDetails}
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* Data Processing Authorization */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <label className="flex items-start cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.dataProcessingAuthorized}
+                      onChange={(e) => handleInputChange('dataProcessingAuthorized', e.target.checked)}
+                      className="w-4 h-4 accent-[#FF8C00] mr-3 mt-1 flex-shrink-0"
+                    />
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-800">
+                        Autorizo el tratamiento de mis datos personales *
+                      </span>
+                      <p className="text-gray-600 mt-1">
+                        Acepto que mis datos personales sean utilizados para procesar mi pedido y contactarme. 
+                        <a 
+                          href="https://example.com/politica-datos.pdf" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[#FF8C00] hover:text-orange-600 font-medium ml-1 inline-flex items-center"
+                        >
+                          Ver política de tratamiento de datos
+                          <ExternalLink size={12} className="ml-1" />
+                        </a>
+                      </p>
+                    </div>
+                  </label>
                 </div>
               </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MenuItem, CustomizationOption } from '../types';
 import { useOrder } from '../context/OrderContext';
 import { X, Plus, Minus } from 'lucide-react';
@@ -7,18 +7,33 @@ interface CustomizationModalProps {
   menuItem: MenuItem;
   options: CustomizationOption[];
   onClose: () => void;
+  onItemAdded?: () => void; // Nueva prop para notificar cuando se añade un item
 }
 
 const CustomizationModal: React.FC<CustomizationModalProps> = ({
   menuItem,
   options,
   onClose,
+  onItemAdded,
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<CustomizationOption[]>([]);
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [withFries, setWithFries] = useState(false);
   const { addToCart } = useOrder();
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar modal al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
 
   const toggleOption = (option: CustomizationOption) => {
     if (option.name === 'Agregar papas (+$6.000)') {
@@ -39,6 +54,12 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
   const handleAddToCart = () => {
     const customizations = selectedOptions.filter(opt => opt.name !== 'Agregar papas (+$6.000)');
     addToCart(menuItem, quantity, customizations, withFries, specialInstructions);
+    
+    // Notificar que se añadió un item (para mostrar SuggestionsModal)
+    if (onItemAdded) {
+      onItemAdded();
+    }
+    
     onClose();
   };
 
@@ -110,7 +131,7 @@ const CustomizationModal: React.FC<CustomizationModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-1 sm:p-4">
-      <div className="bg-white rounded-xl w-full max-w-sm sm:max-w-lg max-h-[98vh] sm:max-h-[95vh] flex flex-col mx-1 sm:mx-4">
+      <div ref={modalRef} className="bg-white rounded-xl w-full max-w-sm sm:max-w-lg max-h-[98vh] sm:max-h-[95vh] flex flex-col mx-1 sm:mx-4">
         {/* Header with image */}
         <div className="relative flex-shrink-0">
           <div className="h-24 sm:h-32 md:h-40 relative">

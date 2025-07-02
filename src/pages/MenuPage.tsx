@@ -220,10 +220,14 @@ const MenuPage: React.FC = () => {
   };
 
   const handleCloseModal = () => {
-    const isBurgerCategory = selectedItem?.category.includes('burger');
     setSelectedItem(null);
+  };
+
+  // Nueva función para manejar cuando se añade un item
+  const handleItemAdded = () => {
+    const isBurgerCategory = selectedItem?.category.includes('burger');
     
-    // Only show suggestions modal for burger categories
+    // Solo mostrar sugerencias para categorías de hamburguesas
     if (isBurgerCategory) {
       setShowSuggestions(true);
     }
@@ -390,6 +394,7 @@ const MenuPage: React.FC = () => {
                         option.id <= 10
             )}
             onClose={handleCloseModal}
+            onItemAdded={handleItemAdded}
           />
         )}
 
