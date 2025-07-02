@@ -509,7 +509,13 @@ ${cartDetails}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
                     placeholder="Escribe el nombre de tu barrio"
                   />
+                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-800 font-medium mb-1">
+                      📍 Zonas de entrega para <span className="font-heavyrust-primary">{selectedLocation?.name}</span>:
+                    </p>
 
+
+                  </div>
                 </div>
 
                 {/* Phone */}
