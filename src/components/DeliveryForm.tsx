@@ -510,6 +510,7 @@ ${cartDetails}
                     placeholder="Escribe el nombre de tu barrio"
                   />
 
+                </div>
 
                 {/* Phone */}
                 <div>
