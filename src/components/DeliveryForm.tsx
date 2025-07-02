@@ -523,9 +523,7 @@ ${cartDetails}
                         </span>
                       ))}
                     </div>
-                    <p className="text-xs text-blue-600 mt-2">
-                      Si tu barrio no está en la lista, escríbelo y confirmaremos la disponibilidad del servicio.
-                    </p>
+
                   </div>
                 </div>
 
