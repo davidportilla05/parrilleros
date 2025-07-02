@@ -513,11 +513,7 @@ ${cartDetails}
                     <p className="text-xs text-blue-800 font-medium mb-1">
                       📍 Zonas de entrega para <span className="font-heavyrust-primary">{selectedLocation?.name}</span>:
                     </p>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedLocation?.deliveryZones.map((zone, index) => (
 
-                      ))}
-                    </div>
 
                   </div>
                 </div>
