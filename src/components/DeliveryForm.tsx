@@ -515,12 +515,7 @@ ${cartDetails}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {selectedLocation?.deliveryZones.map((zone, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs"
-                        >
-                          {zone}
-                        </span>
+
                       ))}
                     </div>
 
