@@ -289,7 +289,7 @@ const MenuPage: React.FC = () => {
 
   return (
     <Layout title="Menú" showCart={false}>
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 menu-page-bg">
         {/* Enhanced Back Button */}
         <div className="max-w-4xl mx-auto mb-6">
           <button
@@ -298,7 +298,7 @@ const MenuPage: React.FC = () => {
             onClick={() => navigate('/')}
             onMouseEnter={handleBackButtonHover}
             onMouseLeave={handleBackButtonLeave}
-            className="group flex items-center bg-white hover:bg-[#FF8C00] text-[#FF8C00] hover:text-white px-4 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-2 border-[#FF8C00] font-semibold"
+            className="group flex items-center bg-white hover:bg-[#FF8C00] text-[#FF8C00] hover:text-white px-4 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-2 border-[#FF8C00] font-semibold menu-card-enhanced"
           >
             <ArrowLeft 
               size={20} 
@@ -310,27 +310,31 @@ const MenuPage: React.FC = () => {
 
         {/* Search Bar */}
         <div ref={searchBarRef} className="max-w-4xl mx-auto mb-8" data-tour="search-bar">
-          <SearchBar 
-            onSearch={handleSearch}
-            placeholder="Buscar hamburguesas, bebidas, acompañamientos..."
-          />
+          <div className="menu-search-enhanced rounded-2xl p-1">
+            <SearchBar 
+              onSearch={handleSearch}
+              placeholder="Buscar hamburguesas, bebidas, acompañamientos..."
+            />
+          </div>
         </div>
 
         {/* Category Selector - only show when not searching */}
         {showCategorySelector && (
           <div ref={categorySelectorRef} className="max-w-4xl mx-auto mb-12" data-tour="category-selector">
-            <CategorySelector
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={handleCategoryChange}
-            />
+            <div className="menu-category-enhanced rounded-2xl">
+              <CategorySelector
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={handleCategoryChange}
+              />
+            </div>
           </div>
         )}
 
         {/* Search Results Header */}
         {searchQuery.trim() && (
           <div className="max-w-4xl mx-auto mb-8">
-            <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="menu-card-enhanced rounded-lg shadow-sm p-4">
               <h2 className="text-xl font-bold text-gray-800">
                 Resultados para "{searchQuery}"
               </h2>
@@ -350,13 +354,15 @@ const MenuPage: React.FC = () => {
                 ref={el => menuCardsRefs.current[index] = el}
                 className="menu-card-container"
               >
-                <MenuCard item={item} onClick={handleItemClick} />
+                <div className="menu-card-enhanced rounded-2xl">
+                  <MenuCard item={item} onClick={handleItemClick} />
+                </div>
               </div>
             ))}
           </div>
         ) : searchQuery.trim() ? (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+            <div className="menu-card-enhanced rounded-lg shadow-sm p-8 text-center">
               <div className="text-gray-400 mb-4">
                 <SearchBar onSearch={() => {}} placeholder="" />
               </div>
@@ -400,7 +406,7 @@ const MenuPage: React.FC = () => {
           <div ref={cartButtonRef} className="fixed bottom-8 right-8 z-50" data-tour="cart-button">
             <button
               onClick={() => navigate('/cart')}
-              className="flex items-center bg-[#FF8C00] text-white px-6 py-4 rounded-full shadow-lg hover:bg-orange-600 transition-all hover:scale-105 hover:shadow-xl"
+              className="flex items-center bg-[#FF8C00] text-white px-6 py-4 rounded-full shadow-lg hover:bg-orange-600 transition-all hover:scale-105 hover:shadow-xl backdrop-blur-sm"
             >
               <ShoppingCart size={28} />
               <span className="ml-3 font-bold text-lg">{cartTotal}</span>
