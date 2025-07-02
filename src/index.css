@@ -60,6 +60,43 @@
   text-transform: uppercase;
 }
 
+/* Background Layers with Mix Blend Modes */
+.welcome-page-bg {
+  background: #1A1A1A;
+}
+
+.bg-layer-1 {
+  background-image: url('https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=2');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+}
+
+.bg-layer-2 {
+  background-image: url('https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=2');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.1;
+  mix-blend-mode: screen;
+}
+
+.bg-overlay {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(26, 26, 26, 0.8) 50%, rgba(255, 140, 0, 0.05) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Text Shadow Effects */
+.text-shadow-lg {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(255, 140, 0, 0.3);
+}
+
+.text-shadow-md {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(255, 140, 0, 0.2);
+}
+
 /* GSAP Animation Classes */
 .gsap-fade-in {
   opacity: 0;

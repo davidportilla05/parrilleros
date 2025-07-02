@@ -192,9 +192,14 @@ const WelcomePage: React.FC = () => {
   return (
     <div 
       ref={backgroundRef}
-      className="min-h-screen bg-[#1A1A1A] flex flex-col items-center justify-center p-4 text-center relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center p-4 text-center relative overflow-hidden welcome-page-bg"
       onClick={handleStart}
     >
+      {/* Layered Background Images with Mix Blend Modes */}
+      <div className="absolute inset-0 bg-layer-1"></div>
+      <div className="absolute inset-0 bg-layer-2"></div>
+      <div className="absolute inset-0 bg-overlay"></div>
+      
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div 
@@ -222,13 +227,13 @@ const WelcomePage: React.FC = () => {
           </div>
           <h1 
             ref={titleRef}
-            className="text-5xl font-extrabold text-white mb-2 font-heavyrust-primary"
+            className="text-5xl font-extrabold text-white mb-2 font-heavyrust-primary text-shadow-lg"
           >
             PARRILLEROS
           </h1>
           <p 
             ref={subtitleRef}
-            className="text-2xl text-[#FF8C00] font-bold font-bebas-neue-primary"
+            className="text-2xl text-[#FF8C00] font-bold font-bebas-neue-primary text-shadow-md"
           >
             FAST FOOD
           </p>
@@ -237,14 +242,14 @@ const WelcomePage: React.FC = () => {
         <div>
           <p 
             ref={descriptionRef}
-            className="text-white text-xl mb-12 max-w-md mx-auto"
+            className="text-white text-xl mb-12 max-w-md mx-auto text-shadow-md"
           >
             Bienvenido a tu experiencia de autoservicio. Toque la pantalla para comenzar su pedido.
           </p>
           
           <div 
             ref={buttonRef}
-            className="inline-flex items-center bg-[#FF8C00] text-white px-8 py-4 rounded-full text-xl font-bold hover:bg-orange-600 transition-colors cursor-pointer shadow-2xl"
+            className="inline-flex items-center bg-[#FF8C00] text-white px-8 py-4 rounded-full text-xl font-bold hover:bg-orange-600 transition-colors cursor-pointer shadow-2xl backdrop-blur-sm"
             onMouseEnter={handleButtonHover}
             onMouseLeave={handleButtonLeave}
           >
