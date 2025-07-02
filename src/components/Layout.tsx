@@ -63,8 +63,8 @@ const Layout: React.FC<LayoutProps> = ({
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1">
+      {/* Main Content with Background */}
+      <main className="flex-1 menu-page-bg">
         {children}
       </main>
 

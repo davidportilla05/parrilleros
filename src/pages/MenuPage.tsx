@@ -289,7 +289,7 @@ const MenuPage: React.FC = () => {
 
   return (
     <Layout title="Menú" showCart={false}>
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 menu-page-bg">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Enhanced Back Button */}
         <div className="max-w-4xl mx-auto mb-6">
           <button
