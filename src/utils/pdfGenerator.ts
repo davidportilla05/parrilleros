@@ -208,7 +208,7 @@ export const generateInvoicePDF = (data: InvoiceData): void => {
   doc.setTextColor(146, 64, 14); // text-amber-800
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('🛵 INFORMACIÓN DE ENTREGA', 20, yPosition + 8);
+  doc.text('INFORMACIÓN DE ENTREGA', 20, yPosition + 8);
   doc.setFont('helvetica', 'normal');
   doc.text('Tiempo estimado: 45-60 minutos', 20, yPosition + 15);
   
