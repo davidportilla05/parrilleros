@@ -7,6 +7,7 @@ import WelcomePage from './pages/WelcomePage';
 import MenuPage from './pages/MenuPage';
 import CartPage from './pages/CartPage';
 import TicketPage from './pages/TicketPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/ticket" element={<TicketPage />} />
-          <Route path="*" element={<Navigate to="/\" replace />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </OrderProvider>
     </BrowserRouter>
