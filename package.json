@@ -14,7 +14,6 @@
     "escpos": "^3.0.0-alpha.6",
     "escpos-usb": "^3.0.0-alpha.4",
     "gsap": "^3.12.2",
-    "idb": "^8.0.0",
     "jspdf": "^2.5.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.344.0",

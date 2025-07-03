@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck, Download, Printer, Receipt, ExternalLink } from 'lucide-react';
 import { useOrder } from '../context/OrderContext';
-import { useDatabase } from '../hooks/useDatabase';
 import OrderSummary from './OrderSummary';
 import TourButton from './TourButton';
 import LocationSelectionPage from '../pages/LocationSelectionPage';
@@ -44,7 +43,6 @@ const deliveryFormTourSteps = [
 const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   const navigate = useNavigate();
   const { cart, total, clearCart, orderNumber } = useOrder();
-  const { orders, invoices } = useDatabase();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showLocationSelection, setShowLocationSelection] = useState(true);
   const [formData, setFormData] = useState({
@@ -55,13 +53,12 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     cedula: '',
     email: '',
     paymentMethod: '',
-    requiresInvoice: false,
-    dataProcessingAuthorized: false
+    requiresInvoice: false, // Nueva opción para factura
+    dataProcessingAuthorized: false // Nueva opción para autorización de datos
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [showTourButton, setShowTourButton] = useState(true);
-  const [submittedOrderData, setSubmittedOrderData] = useState<any>(null);
   const ticketRef = useRef<HTMLDivElement>(null);
 
   const { startTour } = useDriverTour({
@@ -123,8 +120,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
            formData.phone && 
            formData.paymentMethod && 
            cart.length > 0 &&
-           formData.dataProcessingAuthorized;
+           formData.dataProcessingAuthorized; // Autorización de datos es obligatoria
 
+    // Si requiere factura, validar campos adicionales
     if (formData.requiresInvoice) {
       return basicFieldsValid && formData.cedula && formData.email;
     }
@@ -133,8 +131,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   };
 
   const generateTicketContent = () => {
-    const subtotal = total * 0.92;
-    const iva = total * 0.08;
+    // Cálculos de impuestos corregidos - solo IVA
+    const subtotal = total * 0.92; // Base gravable (92%)
+    const iva = total * 0.08; // IVA (8%)
 
     const cartDetails = cart.map((item, index) => {
       const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
@@ -191,13 +190,13 @@ ${cartDetails}
   };
 
   const handleDownloadTicket = () => {
-    if (!selectedLocation || !submittedOrderData) return;
+    if (!selectedLocation) return;
 
     const subtotal = total * 0.92;
     const iva = total * 0.08;
 
     const invoiceData = {
-      orderNumber: submittedOrderData.orderNumber,
+      orderNumber,
       customerName: formData.name,
       customerPhone: formData.phone,
       customerEmail: formData.requiresInvoice ? formData.email : undefined,
@@ -252,59 +251,21 @@ ${cartDetails}
     
     setIsSubmitting(true);
     
-    try {
-      // Crear pedido en la base de datos
-      const customerData = {
-        nombre: formData.name,
-        telefono: formData.phone,
-        email: formData.requiresInvoice ? formData.email : undefined,
-        cedula: formData.requiresInvoice ? formData.cedula : undefined,
-        direccion: formData.address,
-        barrio: formData.neighborhood
-      };
-
-      const { orderId, orderNumber: newOrderNumber } = await orders.createOrder(
-        customerData,
-        cart,
-        parseInt(selectedLocation.id),
-        formData.paymentMethod,
-        formData.requiresInvoice,
-        'Pedido desde kiosco de autoservicio'
-      );
-
-      // Crear factura si es requerida
-      if (formData.requiresInvoice && formData.cedula && formData.email) {
-        const subtotal = total * 0.92;
-        const iva = total * 0.08;
-        
-        await invoices.createInvoice(
-          orderId,
-          formData.name,
-          formData.cedula,
-          formData.email,
-          Math.round(subtotal),
-          Math.round(iva),
-          Math.round(total)
-        );
-      }
-
-      setSubmittedOrderData({ orderId, orderNumber: newOrderNumber });
+    // Simulate order processing
+    setTimeout(() => {
+      setIsSubmitting(false);
       setOrderSubmitted(true);
 
-      // Construct WhatsApp message
+      // Construct WhatsApp message with exact format
       const message = generateTicketContent();
+      
+      // Encode message and create WhatsApp URL with selected location's WhatsApp
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${selectedLocation.whatsapp}?text=${encodedMessage}`;
 
       // Open WhatsApp in a new tab
       window.open(whatsappUrl, '_blank');
-
-    } catch (error) {
-      console.error('Error creando pedido:', error);
-      alert('Error al crear el pedido. Por favor intenta nuevamente.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, 2000);
   };
 
   const handleFinish = () => {
@@ -351,7 +312,7 @@ ${cartDetails}
           <div className="space-y-3 mb-6 text-left">
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">📋 Número de pedido:</span>
-              <span className="font-bold text-[#FF8C00]">#{submittedOrderData?.orderNumber || orderNumber.toString().padStart(3, '0')}</span>
+              <span className="font-bold text-[#FF8C00]">#{orderNumber.toString().padStart(3, '0')}</span>
             </div>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -374,6 +335,7 @@ ${cartDetails}
               <span className="font-medium text-right">{formData.address}, {formData.neighborhood}</span>
             </div>
 
+            {/* Información de factura */}
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">📄 Factura:</span>
               <span className="font-medium text-right">
@@ -381,6 +343,7 @@ ${cartDetails}
               </span>
             </div>
 
+            {/* Desglose de costos corregido - solo IVA */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h4 className="font-bold text-blue-800 mb-3">💰 Desglose de Costos:</h4>
               <div className="space-y-2 text-sm">
@@ -577,6 +540,7 @@ ${cartDetails}
                         </span>
                       ))}
                     </div>
+
                   </div>
                 </div>
 
@@ -738,7 +702,7 @@ ${cartDetails}
           </div>
         </div>
 
-        {/* Tour Button */}
+        {/* Tour Button - Pequeño en esquina inferior izquierda */}
         {showTourButton && !orderSubmitted && (
           <TourButton 
             onStartTour={handleStartTour}
