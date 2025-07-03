@@ -42,7 +42,7 @@ export const generateInvoicePDF = (data: InvoiceData): void => {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(24);
   doc.setFont('helvetica', 'bold');
-  doc.text('🍔', 15, 25);
+
   
   // Company name
   doc.setFontSize(20);
