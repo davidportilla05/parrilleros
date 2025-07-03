@@ -7,6 +7,7 @@ import TourButton from './TourButton';
 import LocationSelectionPage from '../pages/LocationSelectionPage';
 import { Location } from '../types';
 import { useDriverTour } from '../hooks/useDriverTour';
+import { generateInvoicePDF } from '../utils/pdfGenerator';
 
 interface DeliveryFormProps {
   onBack: () => void;
@@ -189,16 +190,32 @@ ${cartDetails}
   };
 
   const handleDownloadTicket = () => {
-    const ticketContent = generateTicketContent();
-    const blob = new Blob([ticketContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Ticket_Parrilleros_${orderNumber.toString().padStart(3, '0')}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    if (!selectedLocation) return;
+
+    const subtotal = total * 0.92;
+    const iva = total * 0.08;
+
+    const invoiceData = {
+      orderNumber,
+      customerName: formData.name,
+      customerPhone: formData.phone,
+      customerEmail: formData.requiresInvoice ? formData.email : undefined,
+      customerCedula: formData.requiresInvoice ? formData.cedula : undefined,
+      address: formData.address,
+      neighborhood: formData.neighborhood,
+      locationName: selectedLocation.name,
+      locationAddress: selectedLocation.address,
+      locationPhone: selectedLocation.phone,
+      items: cart,
+      subtotal: Math.round(subtotal),
+      iva: Math.round(iva),
+      total: Math.round(total),
+      paymentMethod: formData.paymentMethod,
+      requiresInvoice: formData.requiresInvoice,
+      date: new Date()
+    };
+
+    generateInvoicePDF(invoiceData);
   };
 
   const handlePrintTicket = () => {
@@ -390,7 +407,7 @@ ${cartDetails}
                 className="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center text-sm"
               >
                 <Download size={16} className="mr-1" />
-                Descargar Ticket
+                Descargar PDF
               </button>
               <button
                 onClick={handlePrintTicket}
