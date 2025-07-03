@@ -22,219 +22,171 @@ interface InvoiceData {
 }
 
 export const generateInvoicePDF = (data: InvoiceData): void => {
-  const doc = new jsPDF();
+  // Create a receipt-style PDF (narrow width like a thermal printer receipt)
+  const receiptWidth = 80; // 80mm width (typical thermal receipt width)
+  const doc = new jsPDF({
+    unit: 'mm',
+    format: [receiptWidth, 200], // Start with 200mm height, will auto-extend
+    orientation: 'portrait'
+  });
+  
   const pageWidth = doc.internal.pageSize.width;
-  const pageHeight = doc.internal.pageSize.height;
+  let yPosition = 5;
+  const leftMargin = 2;
+  const rightMargin = pageWidth - 2;
+  const contentWidth = pageWidth - 4;
   
-  // Colors
-  const primaryColor = [255, 140, 0]; // #FF8C00
-  const darkColor = [26, 26, 26]; // #1A1A1A
-  const grayColor = [107, 114, 128]; // #6B7280
-  const lightGrayColor = [243, 244, 246]; // #F3F4F6
+  // Helper function to add text with automatic line wrapping
+  const addWrappedText = (text: string, x: number, y: number, maxWidth: number, fontSize: number = 8, style: string = 'normal'): number => {
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', style);
+    const lines = doc.splitTextToSize(text, maxWidth);
+    lines.forEach((line: string, index: number) => {
+      doc.text(line, x, y + (index * (fontSize * 0.4)));
+    });
+    return y + (lines.length * (fontSize * 0.4));
+  };
   
-  let yPosition = 20;
+  // Helper function to add centered text
+  const addCenteredText = (text: string, y: number, fontSize: number = 8, style: string = 'normal'): number => {
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', style);
+    doc.text(text, pageWidth / 2, y, { align: 'center' });
+    return y + (fontSize * 0.4);
+  };
   
-  // Header with company branding
-  doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, pageWidth, 35, 'F');
+  // Helper function to add separator line
+  const addSeparatorLine = (y: number): number => {
+    doc.setDrawColor(0, 0, 0);
+    doc.line(leftMargin, y, rightMargin, y);
+    return y + 2;
+  };
   
-  // Company logo area (simulated with text)
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-
+  // Header - Company Info
+  yPosition = addCenteredText('PARRILLEROS', yPosition + 3, 12, 'bold');
+  yPosition = addCenteredText('FAST FOOD', yPosition + 1, 10, 'bold');
+  yPosition = addCenteredText('Hamburguesas Artesanales', yPosition + 1, 8, 'normal');
+  yPosition = addSeparatorLine(yPosition + 2);
   
-  // Company name
-  doc.setFontSize(20);
-  doc.setFont('helvetica', 'bold');
-  doc.text('PARRILLEROS', 25, 20);
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.text('FAST FOOD', 25, 28);
+  // Order number and date - PROMINENT
+  yPosition = addCenteredText(`PEDIDO #${data.orderNumber.toString().padStart(3, '0')}`, yPosition + 2, 14, 'bold');
+  yPosition = addCenteredText(`${data.date.toLocaleDateString('es-CO')} ${data.date.toLocaleTimeString('es-CO')}`, yPosition + 1, 8, 'normal');
+  yPosition = addSeparatorLine(yPosition + 2);
   
-  // Invoice title
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text('FACTURA DE VENTA', pageWidth - 15, 20, { align: 'right' });
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Pedido #${data.orderNumber.toString().padStart(3, '0')}`, pageWidth - 15, 28, { align: 'right' });
+  // Location info
+  yPosition = addCenteredText(data.locationName, yPosition + 2, 10, 'bold');
+  yPosition = addWrappedText(data.locationAddress, leftMargin, yPosition + 1, contentWidth, 8, 'normal');
+  yPosition = addCenteredText(`Tel: ${data.locationPhone}`, yPosition + 1, 8, 'normal');
+  yPosition = addSeparatorLine(yPosition + 2);
   
-  yPosition = 50;
-  
-  // Date and location info
-  doc.setTextColor(...darkColor);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Fecha: ${data.date.toLocaleDateString('es-CO')}`, 15, yPosition);
-  doc.text(`Hora: ${data.date.toLocaleTimeString('es-CO')}`, 15, yPosition + 5);
-  doc.text(`Sede: ${data.locationName}`, 15, yPosition + 10);
-  doc.text(`${data.locationAddress}`, 15, yPosition + 15);
-  doc.text(`Tel: ${data.locationPhone}`, 15, yPosition + 20);
-  
-  yPosition += 35;
-  
-  // Customer information section
-  doc.setFillColor(...lightGrayColor);
-  doc.rect(15, yPosition, pageWidth - 30, 25, 'F');
-  
-  doc.setTextColor(...darkColor);
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('INFORMACIÓN DEL CLIENTE', 20, yPosition + 8);
-  
-  yPosition += 15;
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Cliente: ${data.customerName}`, 20, yPosition + 5);
-  doc.text(`Teléfono: ${data.customerPhone}`, 20, yPosition + 10);
-  doc.text(`Dirección: ${data.address}, ${data.neighborhood}`, 20, yPosition + 15);
+  // Customer info
+  yPosition = addCenteredText('DATOS DEL CLIENTE', yPosition + 2, 10, 'bold');
+  yPosition = addWrappedText(`Cliente: ${data.customerName}`, leftMargin, yPosition + 1, contentWidth, 8, 'normal');
+  yPosition = addWrappedText(`Telefono: ${data.customerPhone}`, leftMargin, yPosition + 1, contentWidth, 8, 'normal');
+  yPosition = addWrappedText(`Direccion: ${data.address}`, leftMargin, yPosition + 1, contentWidth, 8, 'normal');
+  yPosition = addWrappedText(`Barrio: ${data.neighborhood}`, leftMargin, yPosition + 1, contentWidth, 8, 'normal');
   
   if (data.requiresInvoice && data.customerCedula && data.customerEmail) {
-    doc.text(`CC: ${data.customerCedula}`, 20, yPosition + 20);
-    doc.text(`Email: ${data.customerEmail}`, 20, yPosition + 25);
-    yPosition += 10;
+    yPosition = addWrappedText(`CC: ${data.customerCedula}`, leftMargin, yPosition + 1, contentWidth, 8, 'normal');
+    yPosition = addWrappedText(`Email: ${data.customerEmail}`, leftMargin, yPosition + 1, contentWidth, 8, 'normal');
   }
   
-  yPosition += 35;
+  yPosition = addSeparatorLine(yPosition + 2);
   
-  // Items table header
-  doc.setFillColor(...primaryColor);
-  doc.rect(15, yPosition, pageWidth - 30, 12, 'F');
+  // Items header
+  yPosition = addCenteredText('PRODUCTOS PEDIDOS', yPosition + 2, 10, 'bold');
+  yPosition = addSeparatorLine(yPosition + 1);
   
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('CANT', 20, yPosition + 8);
-  doc.text('DESCRIPCIÓN', 40, yPosition + 8);
-  doc.text('PRECIO UNIT', pageWidth - 80, yPosition + 8);
-  doc.text('TOTAL', pageWidth - 30, yPosition + 8);
-  
-  yPosition += 15;
-  
-  // Items
-  doc.setTextColor(...darkColor);
-  doc.setFont('helvetica', 'normal');
-  
+  // Items list
   data.items.forEach((item, index) => {
     const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
     const customizationsTotal = item.customizations.reduce((sum, option) => sum + option.price, 0);
     const unitPrice = basePrice + customizationsTotal;
     const itemTotal = unitPrice * item.quantity;
     
-    // Check if we need a new page
-    if (yPosition > pageHeight - 40) {
-      doc.addPage();
-      yPosition = 20;
-    }
-    
-    // Item row background (alternating)
-    if (index % 2 === 0) {
-      doc.setFillColor(248, 250, 252);
-      doc.rect(15, yPosition - 3, pageWidth - 30, 12, 'F');
-    }
-    
-    // Item details
-    doc.setFontSize(9);
-    doc.text(item.quantity.toString(), 20, yPosition + 5);
-    
-    let itemName = item.menuItem.name;
+    // Item name and quantity
+    let itemName = `${index + 1}. ${item.menuItem.name}`;
     if (item.withFries) itemName += ' + Papas';
-    doc.text(itemName, 40, yPosition + 5);
+    yPosition = addWrappedText(itemName, leftMargin, yPosition + 2, contentWidth, 9, 'bold');
     
-    doc.text(`$${unitPrice.toLocaleString()}`, pageWidth - 80, yPosition + 5);
-    doc.text(`$${itemTotal.toLocaleString()}`, pageWidth - 30, yPosition + 5);
-    
-    yPosition += 8;
+    // Quantity and price line
+    const qtyPriceLine = `${item.quantity} x $${unitPrice.toLocaleString()} = $${itemTotal.toLocaleString()}`;
+    yPosition = addWrappedText(qtyPriceLine, leftMargin + 2, yPosition + 1, contentWidth - 2, 8, 'normal');
     
     // Customizations
     if (item.customizations.length > 0) {
-      doc.setFontSize(8);
-      doc.setTextColor(...grayColor);
       const customizationsText = `+ ${item.customizations.map(c => c.name.replace('AD ', '')).join(', ')}`;
-      doc.text(customizationsText, 45, yPosition + 3);
-      yPosition += 5;
+      yPosition = addWrappedText(customizationsText, leftMargin + 2, yPosition + 1, contentWidth - 2, 7, 'italic');
     }
     
     // Special instructions
     if (item.specialInstructions) {
-      doc.setFontSize(8);
-      doc.setTextColor(...grayColor);
-      doc.text(`* ${item.specialInstructions}`, 45, yPosition + 3);
-      yPosition += 5;
+      yPosition = addWrappedText(`* ${item.specialInstructions}`, leftMargin + 2, yPosition + 1, contentWidth - 2, 7, 'italic');
     }
     
-    doc.setTextColor(...darkColor);
-    yPosition += 5;
+    // Add some space between items
+    yPosition += 1;
   });
   
-  yPosition += 10;
+  yPosition = addSeparatorLine(yPosition + 2);
   
   // Totals section
-  const totalsStartY = yPosition;
-  doc.setDrawColor(...grayColor);
-  doc.line(pageWidth - 100, totalsStartY, pageWidth - 15, totalsStartY);
+  yPosition = addCenteredText('RESUMEN DE COSTOS', yPosition + 2, 10, 'bold');
   
-  yPosition += 8;
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Subtotal:', pageWidth - 80, yPosition);
-  doc.text(`$${data.subtotal.toLocaleString()}`, pageWidth - 30, yPosition, { align: 'right' });
-  
-  yPosition += 8;
-  doc.text('IVA (8%):', pageWidth - 80, yPosition);
-  doc.text(`$${data.iva.toLocaleString()}`, pageWidth - 30, yPosition, { align: 'right' });
-  
-  yPosition += 8;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text('TOTAL:', pageWidth - 80, yPosition);
-  doc.setTextColor(...primaryColor);
-  doc.text(`$${data.total.toLocaleString()}`, pageWidth - 30, yPosition, { align: 'right' });
-  
-  yPosition += 15;
-  
-  // Payment method
-  doc.setTextColor(...darkColor);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Forma de pago: ${data.paymentMethod}`, 15, yPosition);
-  
-  yPosition += 15;
-  
-  // Delivery info
-  doc.setFillColor(254, 243, 199); // bg-amber-100
-  doc.rect(15, yPosition, pageWidth - 30, 20, 'F');
-  doc.setTextColor(146, 64, 14); // text-amber-800
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('INFORMACIÓN DE ENTREGA', 20, yPosition + 8);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Tiempo estimado: 45-60 minutos', 20, yPosition + 15);
-  
-  yPosition += 30;
-  
-  // Footer
-  if (yPosition > pageHeight - 40) {
-    doc.addPage();
-    yPosition = 20;
-  }
-  
-  doc.setTextColor(...grayColor);
+  // Subtotal
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text('¡Gracias por su preferencia!', pageWidth / 2, yPosition, { align: 'center' });
-  doc.text('PARRILLEROS FAST FOOD - Hamburguesas artesanales a la parrilla', pageWidth / 2, yPosition + 8, { align: 'center' });
-  doc.text(`Factura generada el ${new Date().toLocaleString('es-CO')}`, pageWidth / 2, yPosition + 16, { align: 'center' });
+  doc.text('Subtotal:', leftMargin, yPosition + 3);
+  doc.text(`$${data.subtotal.toLocaleString()}`, rightMargin, yPosition + 3, { align: 'right' });
   
-  // QR Code placeholder (you could integrate a QR library here)
-  doc.setDrawColor(...grayColor);
-  doc.rect(pageWidth - 35, pageHeight - 35, 20, 20);
+  // IVA
+  doc.text('IVA (8%):', leftMargin, yPosition + 6);
+  doc.text(`$${data.iva.toLocaleString()}`, rightMargin, yPosition + 6, { align: 'right' });
+  
+  yPosition = addSeparatorLine(yPosition + 8);
+  
+  // Total
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('TOTAL:', leftMargin, yPosition + 3);
+  doc.text(`$${data.total.toLocaleString()}`, rightMargin, yPosition + 3, { align: 'right' });
+  
+  yPosition = addSeparatorLine(yPosition + 5);
+  
+  // Payment method
+  yPosition = addWrappedText(`Forma de pago: ${data.paymentMethod}`, leftMargin, yPosition + 2, contentWidth, 8, 'normal');
+  yPosition = addSeparatorLine(yPosition + 2);
+  
+  // Delivery info
+  yPosition = addCenteredText('INFORMACION DE ENTREGA', yPosition + 2, 9, 'bold');
+  yPosition = addCenteredText('Tiempo estimado: 45-60 min', yPosition + 1, 8, 'normal');
+  yPosition = addCenteredText('Te contactaremos pronto', yPosition + 1, 8, 'normal');
+  yPosition = addSeparatorLine(yPosition + 2);
+  
+  // Footer
+  yPosition = addCenteredText('¡Gracias por tu preferencia!', yPosition + 3, 9, 'bold');
+  yPosition = addCenteredText('PARRILLEROS FAST FOOD', yPosition + 1, 8, 'normal');
+  yPosition = addCenteredText('Hamburguesas artesanales', yPosition + 1, 7, 'normal');
+  yPosition = addCenteredText('a la parrilla', yPosition + 1, 7, 'normal');
+  
+  yPosition += 3;
+  yPosition = addCenteredText(`Factura generada: ${new Date().toLocaleString('es-CO')}`, yPosition, 6, 'normal');
+  
+  // QR Code placeholder
+  yPosition += 5;
+  const qrSize = 15;
+  const qrX = (pageWidth - qrSize) / 2;
+  doc.setDrawColor(0, 0, 0);
+  doc.rect(qrX, yPosition, qrSize, qrSize);
   doc.setFontSize(6);
-  doc.text('QR', pageWidth - 25, pageHeight - 23, { align: 'center' });
-  doc.text('Code', pageWidth - 25, pageHeight - 19, { align: 'center' });
+  doc.text('QR CODE', pageWidth / 2, yPosition + (qrSize / 2), { align: 'center' });
   
-  // Save the PDF
+  // Final separator
+  yPosition += qrSize + 2;
+  yPosition = addSeparatorLine(yPosition);
+  yPosition = addCenteredText('--- FIN DE FACTURA ---', yPosition + 2, 7, 'bold');
+  
+  // Save the PDF with order number
   const fileName = `Factura_Parrilleros_${data.orderNumber.toString().padStart(3, '0')}_${data.date.toISOString().split('T')[0]}.pdf`;
   doc.save(fileName);
 };

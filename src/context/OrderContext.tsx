@@ -23,16 +23,17 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   
-  // Initialize orderNumber from localStorage or start at 1
+  // Initialize orderNumber from localStorage with automatic increment
   const [orderNumber, setOrderNumber] = useState(() => {
-    const savedOrderNumber = localStorage.getItem('lastOrderNumber');
-    return savedOrderNumber ? parseInt(savedOrderNumber) : 1;
+    const savedOrderNumber = localStorage.getItem('parrilleros-last-order-number');
+    const lastNumber = savedOrderNumber ? parseInt(savedOrderNumber) : 0;
+    const nextNumber = lastNumber + 1;
+    
+    // Save the new order number immediately
+    localStorage.setItem('parrilleros-last-order-number', nextNumber.toString());
+    
+    return nextNumber;
   });
-
-  // Save orderNumber to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('lastOrderNumber', orderNumber.toString());
-  }, [orderNumber]);
 
   // Calculate total whenever cart changes
   useEffect(() => {
@@ -90,6 +91,11 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const clearCart = () => {
     setCart([]);
     setPaymentMethod(null);
+    
+    // Generate next order number when cart is cleared (for next order)
+    const nextOrderNumber = orderNumber + 1;
+    setOrderNumber(nextOrderNumber);
+    localStorage.setItem('parrilleros-last-order-number', nextOrderNumber.toString());
   };
 
   const completeOrder = () => {
@@ -105,7 +111,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     
     setCurrentOrder(newOrder);
-    setOrderNumber((prev) => prev + 1);
   };
 
   const value = {
