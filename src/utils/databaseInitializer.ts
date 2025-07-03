@@ -1,8 +1,8 @@
-import { executeQuery } from '../config/database';
+import { dbOperations } from '../config/database';
 import { LogService } from '../services/databaseService';
 
 // =====================================================
-// INICIALIZADOR DE BASE DE DATOS
+// INICIALIZADOR DE BASE DE DATOS PARA WEBCONTAINER
 // =====================================================
 
 export class DatabaseInitializer {
@@ -10,30 +10,35 @@ export class DatabaseInitializer {
   // Poblar productos desde el menú existente
   static async populateProductsFromMenu(): Promise<void> {
     try {
-      console.log('🔄 Iniciando población de productos...');
+      console.log('🔄 Iniciando población de productos en IndexedDB...');
       
       // Importar datos del menú existente
-      const { menuItems, categories } = await import('../data/menu');
+      const { menuItems, categories, customizationOptions } = await import('../data/menu');
+      const { locations } = await import('../data/locations');
       
       // Insertar categorías
       for (const category of categories) {
-        const categoryQuery = `
-          INSERT IGNORE INTO categorias (nombre, descripcion, icono, orden_display)
-          VALUES (?, ?, ?, ?)
-        `;
+        const categoryData = {
+          id: categories.indexOf(category) + 1,
+          nombre: category.name,
+          descripcion: `Categoría de ${category.name}`,
+          icono: category.icon,
+          orden_display: categories.indexOf(category) + 1,
+          activo: true
+        };
         
-        await executeQuery(categoryQuery, [
-          category.name,
-          `Categoría de ${category.name}`,
-          category.icon,
-          categories.indexOf(category) + 1
-        ]);
+        try {
+          await dbOperations.addCategory(categoryData);
+        } catch (error) {
+          // Ignorar errores de duplicados
+          console.log(`Categoría ya existe: ${category.name}`);
+        }
       }
       
       console.log('✅ Categorías insertadas');
       
-      // Obtener IDs de categorías
-      const categoriesFromDB = await executeQuery('SELECT * FROM categorias');
+      // Obtener categorías para mapeo
+      const categoriesFromDB = await dbOperations.getAllCategories();
       const categoryMap = new Map();
       categoriesFromDB.forEach((cat: any) => {
         categoryMap.set(cat.nombre, cat.id);
@@ -66,47 +71,90 @@ export class DatabaseInitializer {
             categoryName = 'Bebidas';
             break;
           default:
-            categoryName = 'Hamburguesas Clásicas';
+            categoryName = 'Hamburguesas';
         }
         
-        const categoryId = categoryMap.get(categoryName);
-        if (!categoryId) {
-          console.warn(`Categoría no encontrada: ${categoryName}`);
-          continue;
+        const categoryId = categoryMap.get(categoryName) || 1;
+        
+        const productData = {
+          id: item.id,
+          nombre: item.name,
+          descripcion: item.description,
+          precio: item.price,
+          precio_con_papas: item.priceWithFries,
+          imagen_url: item.image,
+          categoria_id: categoryId,
+          personalizable: item.customizable || false,
+          activo: true,
+          orden_display: item.id
+        };
+        
+        try {
+          await dbOperations.addProduct(productData);
+        } catch (error) {
+          // Ignorar errores de duplicados
+          console.log(`Producto ya existe: ${item.name}`);
         }
-        
-        const productQuery = `
-          INSERT IGNORE INTO productos (
-            id, nombre, descripcion, precio, precio_con_papas, 
-            imagen_url, categoria_id, personalizable, activo, orden_display
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-        
-        await executeQuery(productQuery, [
-          item.id,
-          item.name,
-          item.description,
-          item.price,
-          item.priceWithFries || null,
-          item.image,
-          categoryId,
-          item.customizable || false,
-          true,
-          item.id
-        ]);
       }
       
       console.log('✅ Productos insertados');
       
-      // Relacionar productos con opciones de personalización
-      await this.linkProductCustomizations();
+      // Insertar opciones de personalización
+      for (const option of customizationOptions) {
+        const optionData = {
+          id: option.id,
+          nombre: option.name,
+          precio_adicional: option.price,
+          activo: true,
+          categoria: 'general'
+        };
+        
+        try {
+          await dbOperations.addCustomizationOption(optionData);
+        } catch (error) {
+          console.log(`Opción ya existe: ${option.name}`);
+        }
+      }
+      
+      console.log('✅ Opciones de personalización insertadas');
+      
+      // Insertar sedes
+      for (const location of locations) {
+        const locationData = {
+          id: parseInt(location.id.split('-')[1]) || locations.indexOf(location) + 1,
+          nombre: location.name,
+          direccion: location.address,
+          telefono: location.phone,
+          whatsapp: location.whatsapp,
+          barrio: location.neighborhood,
+          zonas_entrega: location.deliveryZones,
+          activo: true
+        };
+        
+        try {
+          await dbOperations.addLocation(locationData);
+        } catch (error) {
+          console.log(`Sede ya existe: ${location.name}`);
+        }
+      }
+      
+      console.log('✅ Sedes insertadas');
+      
+      // Configurar valores iniciales
+      await dbOperations.setConfig('ultimo_numero_pedido', '0', 'Último número de pedido generado');
+      await dbOperations.setConfig('ultimo_numero_factura', '0', 'Último número de factura generado');
+      await dbOperations.setConfig('iva_porcentaje', '8', 'Porcentaje de IVA aplicado');
+      await dbOperations.setConfig('empresa_nombre', 'Parrilleros Fast Food', 'Nombre de la empresa');
+      
+      console.log('✅ Configuración inicial establecida');
       
       await LogService.log('info', 'Base de datos poblada con productos del menú', {
         categoriesCount: categories.length,
-        productsCount: menuItems.length
+        productsCount: menuItems.length,
+        locationsCount: locations.length
       });
       
-      console.log('✅ Base de datos poblada exitosamente');
+      console.log('✅ Base de datos IndexedDB poblada exitosamente');
       
     } catch (error) {
       console.error('❌ Error poblando base de datos:', error);
@@ -115,63 +163,11 @@ export class DatabaseInitializer {
     }
   }
   
-  // Relacionar productos con opciones de personalización
-  private static async linkProductCustomizations(): Promise<void> {
-    try {
-      // Obtener productos personalizables (hamburguesas principalmente)
-      const customizableProducts = await executeQuery(`
-        SELECT p.id, c.nombre as categoria_nombre 
-        FROM productos p 
-        JOIN categorias c ON p.categoria_id = c.id 
-        WHERE p.personalizable = true
-      `);
-      
-      // Obtener todas las opciones de personalización
-      const customizationOptions = await executeQuery('SELECT * FROM opciones_personalizacion');
-      
-      for (const product of customizableProducts) {
-        // Determinar qué opciones aplican según la categoría
-        let applicableOptions = customizationOptions;
-        
-        // Para hamburguesas, todas las opciones aplican
-        if (product.categoria_nombre.includes('Hamburguesas')) {
-          applicableOptions = customizationOptions;
-        }
-        // Para perros calientes, opciones limitadas
-        else if (product.categoria_nombre.includes('Perros')) {
-          applicableOptions = customizationOptions.filter((opt: any) => 
-            opt.nombre.includes('CHORIZO') || 
-            opt.nombre.includes('TOCINETA') || 
-            opt.nombre.includes('QUESO') ||
-            opt.nombre.includes('CEBOLLA') ||
-            opt.nombre.includes('JALAPEÑOS')
-          );
-        }
-        
-        // Insertar relaciones
-        for (const option of applicableOptions) {
-          const relationQuery = `
-            INSERT IGNORE INTO producto_personalizaciones (producto_id, opcion_id)
-            VALUES (?, ?)
-          `;
-          
-          await executeQuery(relationQuery, [product.id, option.id]);
-        }
-      }
-      
-      console.log('✅ Relaciones producto-personalización creadas');
-      
-    } catch (error) {
-      console.error('❌ Error creando relaciones de personalización:', error);
-      throw error;
-    }
-  }
-  
   // Verificar si la base de datos necesita inicialización
   static async needsInitialization(): Promise<boolean> {
     try {
-      const productCount = await executeQuery('SELECT COUNT(*) as count FROM productos');
-      return productCount[0].count === 0;
+      const products = await dbOperations.getAllProducts();
+      return products.length === 0;
     } catch (error) {
       console.error('Error verificando inicialización:', error);
       return true;
@@ -181,65 +177,19 @@ export class DatabaseInitializer {
   // Inicializar base de datos completa
   static async initializeDatabase(): Promise<void> {
     try {
-      console.log('🚀 Iniciando inicialización de base de datos...');
+      console.log('🚀 Iniciando inicialización de base de datos IndexedDB...');
       
       const needsInit = await this.needsInitialization();
       
       if (needsInit) {
         await this.populateProductsFromMenu();
-        console.log('✅ Base de datos inicializada completamente');
+        console.log('✅ Base de datos IndexedDB inicializada completamente');
       } else {
-        console.log('ℹ️ Base de datos ya está inicializada');
+        console.log('ℹ️ Base de datos IndexedDB ya está inicializada');
       }
       
     } catch (error) {
       console.error('❌ Error en inicialización de base de datos:', error);
-      throw error;
-    }
-  }
-  
-  // Limpiar y reinicializar base de datos (solo para desarrollo)
-  static async resetDatabase(): Promise<void> {
-    try {
-      console.log('⚠️ REINICIANDO BASE DE DATOS...');
-      
-      // Limpiar tablas en orden correcto (respetando claves foráneas)
-      const cleanupQueries = [
-        'DELETE FROM pedido_item_personalizaciones',
-        'DELETE FROM pedido_items',
-        'DELETE FROM facturas',
-        'DELETE FROM pedidos',
-        'DELETE FROM clientes',
-        'DELETE FROM producto_personalizaciones',
-        'DELETE FROM productos',
-        'DELETE FROM categorias',
-        'DELETE FROM ventas_diarias',
-        'DELETE FROM productos_mas_vendidos',
-        'DELETE FROM logs_sistema'
-      ];
-      
-      for (const query of cleanupQueries) {
-        await executeQuery(query);
-      }
-      
-      // Reiniciar contadores
-      await executeQuery(`
-        UPDATE configuracion_sistema 
-        SET valor = '0' 
-        WHERE clave IN ('ultimo_numero_pedido', 'ultimo_numero_factura')
-      `);
-      
-      console.log('🗑️ Base de datos limpiada');
-      
-      // Repoblar
-      await this.populateProductsFromMenu();
-      
-      await LogService.log('warning', 'Base de datos reiniciada completamente');
-      
-      console.log('✅ Base de datos reiniciada exitosamente');
-      
-    } catch (error) {
-      console.error('❌ Error reiniciando base de datos:', error);
       throw error;
     }
   }
@@ -250,46 +200,27 @@ export class DatabaseInitializer {
     
     try {
       // Verificar que existan categorías
-      const categoryCount = await executeQuery('SELECT COUNT(*) as count FROM categorias');
-      if (categoryCount[0].count === 0) {
+      const categories = await dbOperations.getAllCategories();
+      if (categories.length === 0) {
         issues.push('No hay categorías en la base de datos');
       }
       
       // Verificar que existan productos
-      const productCount = await executeQuery('SELECT COUNT(*) as count FROM productos');
-      if (productCount[0].count === 0) {
+      const products = await dbOperations.getAllProducts();
+      if (products.length === 0) {
         issues.push('No hay productos en la base de datos');
       }
       
       // Verificar que existan sedes
-      const locationCount = await executeQuery('SELECT COUNT(*) as count FROM sedes');
-      if (locationCount[0].count === 0) {
+      const locations = await dbOperations.getAllLocations();
+      if (locations.length === 0) {
         issues.push('No hay sedes configuradas');
       }
       
       // Verificar que existan opciones de personalización
-      const customizationCount = await executeQuery('SELECT COUNT(*) as count FROM opciones_personalizacion');
-      if (customizationCount[0].count === 0) {
+      const customizations = await dbOperations.getAllCustomizationOptions();
+      if (customizations.length === 0) {
         issues.push('No hay opciones de personalización');
-      }
-      
-      // Verificar configuraciones esenciales
-      const essentialConfigs = [
-        'ultimo_numero_pedido',
-        'ultimo_numero_factura',
-        'iva_porcentaje',
-        'empresa_nombre'
-      ];
-      
-      for (const config of essentialConfigs) {
-        const configExists = await executeQuery(
-          'SELECT COUNT(*) as count FROM configuracion_sistema WHERE clave = ?',
-          [config]
-        );
-        
-        if (configExists[0].count === 0) {
-          issues.push(`Configuración faltante: ${config}`);
-        }
       }
       
       const isValid = issues.length === 0;
@@ -316,25 +247,25 @@ export class DatabaseInitializer {
 
 export const initializeDatabaseOnStartup = async (): Promise<void> => {
   try {
-    console.log('🔍 Verificando estado de la base de datos...');
+    console.log('🔍 Verificando estado de la base de datos IndexedDB...');
     
     // Verificar integridad
     const { isValid, issues } = await DatabaseInitializer.verifyDatabaseIntegrity();
     
     if (!isValid) {
-      console.log('🔧 Inicializando base de datos...');
+      console.log('🔧 Inicializando base de datos IndexedDB...');
       await DatabaseInitializer.initializeDatabase();
       
       // Verificar nuevamente
       const { isValid: isValidAfterInit } = await DatabaseInitializer.verifyDatabaseIntegrity();
       
       if (isValidAfterInit) {
-        console.log('✅ Base de datos inicializada y verificada');
+        console.log('✅ Base de datos IndexedDB inicializada y verificada');
       } else {
         console.error('❌ La base de datos sigue teniendo problemas después de la inicialización');
       }
     } else {
-      console.log('✅ Base de datos en buen estado');
+      console.log('✅ Base de datos IndexedDB en buen estado');
     }
     
   } catch (error) {

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { OrderProvider } from './context/OrderContext';
+import { initializeDatabaseOnStartup } from './utils/databaseInitializer';
 
 // Pages
 import WelcomePage from './pages/WelcomePage';
@@ -10,6 +11,20 @@ import TicketPage from './pages/TicketPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 function App() {
+  // Inicializar base de datos al cargar la aplicación
+  useEffect(() => {
+    const initDB = async () => {
+      try {
+        await initializeDatabaseOnStartup();
+        console.log('✅ Base de datos inicializada correctamente');
+      } catch (error) {
+        console.error('❌ Error inicializando base de datos:', error);
+      }
+    };
+
+    initDB();
+  }, []);
+
   return (
     <BrowserRouter>
       <OrderProvider>

@@ -6,7 +6,6 @@ import {
   InvoiceService,
   LocationService,
   ReportsService,
-  ConfigService,
   LogService,
   DatabaseCustomer,
   DatabaseOrder
@@ -111,7 +110,8 @@ export const useOrders = () => {
         total: total,
         metodo_pago: paymentMethod,
         requiere_factura: requiresInvoice,
-        instrucciones_especiales: specialInstructions
+        instrucciones_especiales: specialInstructions,
+        items: cartItems
       };
 
       // Crear pedido
@@ -142,10 +142,10 @@ export const useOrders = () => {
     }
   };
 
-  const loadOrdersBySede = async (sedeId: number, limit: number = 50) => {
+  const loadAllOrders = async () => {
     try {
       setLoading(true);
-      const data = await OrderService.getOrdersBySede(sedeId, limit);
+      const data = await OrderService.getAllOrders();
       setOrders(data);
       setError(null);
     } catch (err) {
@@ -156,35 +156,12 @@ export const useOrders = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId: number, newStatus: string) => {
-    try {
-      await OrderService.updateOrderStatus(orderId, newStatus);
-      
-      // Actualizar el estado local
-      setOrders(prev => prev.map(order => 
-        order.id === orderId ? { ...order, estado: newStatus } : order
-      ));
-      
-      // Log del cambio de estado
-      await LogService.log('info', `Estado de pedido actualizado`, {
-        orderId,
-        newStatus
-      });
-      
-      setError(null);
-    } catch (err) {
-      setError('Error actualizando estado del pedido');
-      console.error('Error updating order status:', err);
-    }
-  };
-
   return {
     orders,
     loading,
     error,
     createOrder,
-    loadOrdersBySede,
-    updateOrderStatus
+    loadAllOrders
   };
 };
 
@@ -203,8 +180,7 @@ export const useInvoices = () => {
     customerEmail: string,
     subtotal: number,
     iva: number,
-    total: number,
-    pdfUrl?: string
+    total: number
   ): Promise<string> => {
     try {
       setLoading(true);
@@ -221,8 +197,7 @@ export const useInvoices = () => {
         cliente_email: customerEmail,
         subtotal,
         iva,
-        total,
-        archivo_pdf_url: pdfUrl
+        total
       });
       
       // Log de factura creada
@@ -300,10 +275,10 @@ export const useReports = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getSalesReport = async (startDate: string, endDate: string, sedeId?: number) => {
+  const getSalesReport = async (startDate: string, endDate: string) => {
     try {
       setLoading(true);
-      const data = await ReportsService.getSalesReport(startDate, endDate, sedeId);
+      const data = await ReportsService.getSalesReport(startDate, endDate);
       setError(null);
       return data;
     } catch (err) {
@@ -315,10 +290,10 @@ export const useReports = () => {
     }
   };
 
-  const getTopProducts = async (sedeId?: number, limit: number = 10) => {
+  const getTopProducts = async (limit: number = 10) => {
     try {
       setLoading(true);
-      const data = await ReportsService.getTopProducts(sedeId, limit);
+      const data = await ReportsService.getTopProducts(limit);
       setError(null);
       return data;
     } catch (err) {
@@ -330,87 +305,11 @@ export const useReports = () => {
     }
   };
 
-  const getDailySales = async (sedeId?: number, days: number = 30) => {
-    try {
-      setLoading(true);
-      const data = await ReportsService.getDailySales(sedeId, days);
-      setError(null);
-      return data;
-    } catch (err) {
-      setError('Error obteniendo ventas diarias');
-      console.error('Error getting daily sales:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return {
     loading,
     error,
     getSalesReport,
-    getTopProducts,
-    getDailySales
-  };
-};
-
-// =====================================================
-// HOOK PARA CONFIGURACIÓN
-// =====================================================
-
-export const useConfig = () => {
-  const [configs, setConfigs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const getConfig = async (key: string): Promise<string | null> => {
-    try {
-      const value = await ConfigService.getConfig(key);
-      return value;
-    } catch (err) {
-      console.error('Error getting config:', err);
-      return null;
-    }
-  };
-
-  const setConfig = async (key: string, value: string, description?: string) => {
-    try {
-      await ConfigService.setConfig(key, value, description);
-      
-      // Log del cambio de configuración
-      await LogService.log('info', `Configuración actualizada: ${key}`, {
-        key,
-        value,
-        description
-      });
-      
-    } catch (err) {
-      console.error('Error setting config:', err);
-      throw err;
-    }
-  };
-
-  const loadAllConfigs = async () => {
-    try {
-      setLoading(true);
-      const data = await ConfigService.getAllConfigs();
-      setConfigs(data);
-      setError(null);
-    } catch (err) {
-      setError('Error cargando configuraciones');
-      console.error('Error loading configs:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return {
-    configs,
-    loading,
-    error,
-    getConfig,
-    setConfig,
-    loadAllConfigs
+    getTopProducts
   };
 };
 
@@ -460,7 +359,6 @@ export const useDatabase = () => {
   const invoices = useInvoices();
   const locations = useLocations();
   const reports = useReports();
-  const config = useConfig();
   const connection = useDatabaseConnection();
 
   return {
@@ -469,7 +367,6 @@ export const useDatabase = () => {
     invoices,
     locations,
     reports,
-    config,
     connection
   };
 };
