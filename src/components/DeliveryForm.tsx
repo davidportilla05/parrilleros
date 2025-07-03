@@ -636,7 +636,7 @@ ${cartDetails}
                       <p className="text-gray-600 mt-1">
                         Acepto que mis datos personales sean utilizados para procesar mi pedido y contactarme. 
                         <a 
-                          href="https://example.com/politica-datos.pdf" 
+                          href="/privacy-policy" 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="text-[#FF8C00] hover:text-orange-600 font-medium ml-1 inline-flex items-center"
