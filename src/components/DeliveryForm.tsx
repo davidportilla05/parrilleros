@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck, Download, Printer, Receipt, ExternalLink } from 'lucide-react';
+import { User, MapPin, Phone, CreditCard, Mail, FileText, ArrowLeft, Send, CheckCircle, Clock, Truck, Download, Printer, Receipt, ExternalLink, AlertCircle } from 'lucide-react';
 import { useOrder } from '../context/OrderContext';
 import OrderSummary from './OrderSummary';
 import TourButton from './TourButton';
@@ -92,6 +92,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     'Daviplata'
   ];
 
+  // Métodos de pago que requieren "+ domicilio"
+  const paymentMethodsWithDelivery = ['Efectivo', 'Bancolombia', 'Nequi'];
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
@@ -161,6 +164,11 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
       `\n📄 FACTURA REQUERIDA\nCC: ${formData.cedula} | Email: ${formData.email}` : 
       '\n📄 Sin factura';
 
+    // Determinar el formato del total según el método de pago
+    const totalFormat = paymentMethodsWithDelivery.includes(formData.paymentMethod) 
+      ? `$${Math.round(total).toLocaleString()} + domicilio`
+      : `$${Math.round(total).toLocaleString()}`;
+
     return `🍔 NUEVO PEDIDO DOMICILIO - PARRILLEROS
 ═══════════════════════════════════════
 
@@ -179,7 +187,7 @@ ${cartDetails}
 💰 DESGLOSE DE COSTOS
 • Subtotal: $${Math.round(subtotal).toLocaleString()}
 • IVA (8%): $${Math.round(iva).toLocaleString()}
-• TOTAL: $${Math.round(total).toLocaleString()}
+• TOTAL: ${totalFormat}
 
 💳 Forma de pago: ${formData.paymentMethod}
 ⏰ Tiempo estimado: 45-60 minutos
@@ -212,7 +220,8 @@ ${cartDetails}
       total: Math.round(total),
       paymentMethod: formData.paymentMethod,
       requiresInvoice: formData.requiresInvoice,
-      date: new Date()
+      date: new Date(),
+      includeDeliveryNote: paymentMethodsWithDelivery.includes(formData.paymentMethod)
     };
 
     generateInvoicePDF(invoiceData);
@@ -288,6 +297,11 @@ ${cartDetails}
     const subtotal = total * 0.92;
     const iva = total * 0.08;
 
+    // Determinar el formato del total según el método de pago
+    const totalDisplayFormat = paymentMethodsWithDelivery.includes(formData.paymentMethod) 
+      ? `$${Math.round(total).toLocaleString()} + domicilio`
+      : `$${Math.round(total).toLocaleString()}`;
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
@@ -358,7 +372,7 @@ ${cartDetails}
                 <div className="border-t border-blue-300 pt-2 mt-2">
                   <div className="flex justify-between font-bold text-base">
                     <span className="text-blue-800">TOTAL:</span>
-                    <span className="text-[#FF8C00]">${Math.round(total).toLocaleString()}</span>
+                    <span className="text-[#FF8C00]">{totalDisplayFormat}</span>
                   </div>
                 </div>
               </div>
@@ -540,7 +554,6 @@ ${cartDetails}
                         </span>
                       ))}
                     </div>
-
                   </div>
                 </div>
 
@@ -635,6 +648,23 @@ ${cartDetails}
                       </option>
                     ))}
                   </select>
+                  
+                  {/* Delivery cost message */}
+                  {formData.paymentMethod && paymentMethodsWithDelivery.includes(formData.paymentMethod) && (
+                    <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start">
+                        <AlertCircle size={16} className="text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-amber-800">
+                            Costo de domicilio adicional
+                          </p>
+                          <p className="text-xs text-amber-700 mt-1">
+                            El valor del domicilio depende de la zona de entrega y se acordará al momento de confirmar el pedido.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Data Processing Authorization */}

@@ -19,6 +19,7 @@ interface InvoiceData {
   paymentMethod: string;
   requiresInvoice: boolean;
   date: Date;
+  includeDeliveryNote?: boolean;
 }
 
 export const generateInvoicePDF = (data: InvoiceData): void => {
@@ -145,16 +146,27 @@ export const generateInvoicePDF = (data: InvoiceData): void => {
   
   yPosition = addSeparatorLine(yPosition + 8);
   
-  // Total
+  // Total with delivery note if applicable
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('TOTAL:', leftMargin, yPosition + 3);
-  doc.text(`$${data.total.toLocaleString()}`, rightMargin, yPosition + 3, { align: 'right' });
+  
+  const totalText = data.includeDeliveryNote 
+    ? `$${data.total.toLocaleString()} + domicilio`
+    : `$${data.total.toLocaleString()}`;
+  
+  doc.text(totalText, rightMargin, yPosition + 3, { align: 'right' });
   
   yPosition = addSeparatorLine(yPosition + 5);
   
   // Payment method
   yPosition = addWrappedText(`Forma de pago: ${data.paymentMethod}`, leftMargin, yPosition + 2, contentWidth, 8, 'normal');
+  
+  // Delivery note if applicable
+  if (data.includeDeliveryNote) {
+    yPosition = addWrappedText('NOTA: Valor del domicilio segun zona', leftMargin, yPosition + 1, contentWidth, 7, 'italic');
+  }
+  
   yPosition = addSeparatorLine(yPosition + 2);
   
   // Delivery info
