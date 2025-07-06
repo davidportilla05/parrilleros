@@ -10,44 +10,7 @@ export const locations: Location[] = [
     neighborhood: 'Tamasagra',
     deliveryZones: [
       'Cualquier sitio de la ciudad'
-    ],
-    deliveryFees: {
-      // Zonas cercanas - Tarifa básica
-      'Tamasagra': 6000,
-      'San Vicente': 6000,
-      'Villa del Río': 6000,
-      'Aranda': 6000,
-      
-      // Zonas intermedias
-      'Centro': 8000,
-      'San Ignacio': 8000,
-      'Las Cuadras': 8000,
-      'Bolivariano': 8000,
-      'Pandiaco': 8000,
-      'Mijitayo': 8000,
-      'La Rosa': 8000,
-      'Fátima': 8000,
-      
-      // Zonas lejanas
-      'Torobajo': 10000,
-      'San Fernando': 10000,
-      'Mapachico': 10000,
-      'Canchala': 10000,
-      'Chapal': 10000,
-      'Cabrera': 10000,
-      'Jongovito': 10000,
-      
-      // Zonas muy lejanas
-      'Catambuco': 12000,
-      'Genoy': 12000,
-      'La Laguna': 12000,
-      'Obonuco': 12000,
-      'Buesaquillo': 12000,
-      'Mocondino': 12000,
-      
-      // Tarifa por defecto para barrios no listados
-      'default': 8000
-    }
+    ]
   },
   {
     id: 'sede-san ignacio',
@@ -58,44 +21,7 @@ export const locations: Location[] = [
     neighborhood: 'San Ignacio',
     deliveryZones: [
       'Cualquier sitio de la ciudad'
-    ],
-    deliveryFees: {
-      // Zonas cercanas - Tarifa básica
-      'San Ignacio': 6000,
-      'Centro': 6000,
-      'Bolivariano': 6000,
-      'Pandiaco': 6000,
-      'Mijitayo': 6000,
-      
-      // Zonas intermedias
-      'Tamasagra': 8000,
-      'San Vicente': 8000,
-      'Villa del Río': 8000,
-      'Aranda': 8000,
-      'Las Cuadras': 8000,
-      'La Rosa': 8000,
-      'Fátima': 8000,
-      'Torobajo': 8000,
-      
-      // Zonas lejanas
-      'San Fernando': 10000,
-      'Mapachico': 10000,
-      'Canchala': 10000,
-      'Chapal': 10000,
-      'Cabrera': 10000,
-      'Jongovito': 10000,
-      
-      // Zonas muy lejanas
-      'Catambuco': 12000,
-      'Genoy': 12000,
-      'La Laguna': 12000,
-      'Obonuco': 12000,
-      'Buesaquillo': 12000,
-      'Mocondino': 12000,
-      
-      // Tarifa por defecto para barrios no listados
-      'default': 8000
-    }
+    ]
   },
   {
     id: 'sede-las cuadras',
@@ -106,43 +32,6 @@ export const locations: Location[] = [
     neighborhood: 'Las Cuadras',
     deliveryZones: [
        'Cualquier sitio de la ciudad'
-    ],
-    deliveryFees: {
-      // Zonas cercanas - Tarifa básica
-      'Las Cuadras': 6000,
-      'La Rosa': 6000,
-      'Fátima': 6000,
-      'Torobajo': 6000,
-      'San Fernando': 6000,
-      
-      // Zonas intermedias
-      'Centro': 8000,
-      'San Ignacio': 8000,
-      'Bolivariano': 8000,
-      'Pandiaco': 8000,
-      'Mijitayo': 8000,
-      'Tamasagra': 8000,
-      'San Vicente': 8000,
-      'Villa del Río': 8000,
-      'Aranda': 8000,
-      
-      // Zonas lejanas
-      'Mapachico': 10000,
-      'Canchala': 10000,
-      'Chapal': 10000,
-      'Cabrera': 10000,
-      'Jongovito': 10000,
-      
-      // Zonas muy lejanas
-      'Catambuco': 12000,
-      'Genoy': 12000,
-      'La Laguna': 12000,
-      'Obonuco': 12000,
-      'Buesaquillo': 12000,
-      'Mocondino': 12000,
-      
-      // Tarifa por defecto para barrios no listados
-      'default': 8000
-    }
+    ]
   }
 ];

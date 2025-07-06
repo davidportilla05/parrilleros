@@ -8,22 +8,17 @@ interface OrderContextType {
   updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
   total: number;
-  subtotal: number;
-  deliveryFee: number;
   paymentMethod: PaymentMethod | null;
   setPaymentMethod: (method: PaymentMethod) => void;
   currentOrder: Order | null;
   completeOrder: () => void;
   orderNumber: number;
-  setDeliveryFee: (fee: number) => void;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [subtotal, setSubtotal] = useState(0);
-  const [deliveryFee, setDeliveryFee] = useState(0);
   const [total, setTotal] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
@@ -40,9 +35,9 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return nextNumber;
   });
 
-  // Calculate subtotal whenever cart changes
+  // Calculate total whenever cart changes
   useEffect(() => {
-    const newSubtotal = cart.reduce((sum, item) => {
+    const newTotal = cart.reduce((sum, item) => {
       const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
       const itemTotal = basePrice * item.quantity;
       const customizationsTotal = item.customizations.reduce(
@@ -53,13 +48,8 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return sum + itemTotal + customizationsTotal;
     }, 0);
     
-    setSubtotal(Math.round(newSubtotal));
+    setTotal(Math.round(newTotal));
   }, [cart]);
-
-  // Calculate total whenever subtotal or deliveryFee changes
-  useEffect(() => {
-    setTotal(Math.round(subtotal + deliveryFee));
-  }, [subtotal, deliveryFee]);
 
   const addToCart = (
     menuItem: MenuItem,
@@ -101,7 +91,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const clearCart = () => {
     setCart([]);
     setPaymentMethod(null);
-    setDeliveryFee(0);
     
     // Generate next order number when cart is cleared (for next order)
     const nextOrderNumber = orderNumber + 1;
@@ -131,14 +120,11 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     updateQuantity,
     clearCart,
     total,
-    subtotal,
-    deliveryFee,
     paymentMethod,
     setPaymentMethod,
     currentOrder,
     completeOrder,
     orderNumber,
-    setDeliveryFee,
   };
 
   return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;

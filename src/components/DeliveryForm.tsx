@@ -42,7 +42,7 @@ const deliveryFormTourSteps = [
 
 const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
   const navigate = useNavigate();
-  const { cart, total, subtotal, deliveryFee, setDeliveryFee, clearCart, orderNumber } = useOrder();
+  const { cart, total, clearCart, orderNumber } = useOrder();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showLocationSelection, setShowLocationSelection] = useState(true);
   const [formData, setFormData] = useState({
@@ -53,8 +53,8 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
     cedula: '',
     email: '',
     paymentMethod: '',
-    requiresInvoice: false,
-    dataProcessingAuthorized: false
+    requiresInvoice: false, // Nueva opción para factura
+    dataProcessingAuthorized: false // Nueva opción para autorización de datos
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
@@ -84,17 +84,6 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
       }
     }
   }, [startTour, showLocationSelection, selectedLocation]);
-
-  // Calculate delivery fee when neighborhood changes
-  useEffect(() => {
-    if (selectedLocation && formData.neighborhood.trim()) {
-      const neighborhood = formData.neighborhood.trim();
-      const fee = selectedLocation.deliveryFees[neighborhood] || selectedLocation.deliveryFees['default'] || 8000;
-      setDeliveryFee(fee);
-    } else {
-      setDeliveryFee(0);
-    }
-  }, [selectedLocation, formData.neighborhood, setDeliveryFee]);
 
   const paymentMethods = [
     'Efectivo',
@@ -131,8 +120,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
            formData.phone && 
            formData.paymentMethod && 
            cart.length > 0 &&
-           formData.dataProcessingAuthorized;
+           formData.dataProcessingAuthorized; // Autorización de datos es obligatoria
 
+    // Si requiere factura, validar campos adicionales
     if (formData.requiresInvoice) {
       return basicFieldsValid && formData.cedula && formData.email;
     }
@@ -142,8 +132,8 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onBack }) => {
 
   const generateTicketContent = () => {
     // Cálculos de impuestos corregidos - solo IVA
-    const productSubtotal = subtotal * 0.92;
-    const iva = subtotal * 0.08;
+    const subtotal = total * 0.92; // Base gravable (92%)
+    const iva = total * 0.08; // IVA (8%)
 
     const cartDetails = cart.map((item, index) => {
       const basePrice = item.withFries ? (item.menuItem.priceWithFries || item.menuItem.price) : item.menuItem.price;
@@ -187,11 +177,9 @@ ${formData.address}, ${formData.neighborhood}
 ${cartDetails}
 
 💰 DESGLOSE DE COSTOS
-• Subtotal productos: $${Math.round(productSubtotal).toLocaleString()}
+• Subtotal: $${Math.round(subtotal).toLocaleString()}
 • IVA (8%): $${Math.round(iva).toLocaleString()}
-• Subtotal: $${subtotal.toLocaleString()}
-• Domicilio: $${deliveryFee.toLocaleString()}
-• TOTAL: $${total.toLocaleString()}
+• TOTAL: $${Math.round(total).toLocaleString()}
 
 💳 Forma de pago: ${formData.paymentMethod}
 ⏰ Tiempo estimado: 45-60 minutos
@@ -204,8 +192,8 @@ ${cartDetails}
   const handleDownloadTicket = () => {
     if (!selectedLocation) return;
 
-    const productSubtotal = subtotal * 0.92;
-    const iva = subtotal * 0.08;
+    const subtotal = total * 0.92;
+    const iva = total * 0.08;
 
     const invoiceData = {
       orderNumber,
@@ -219,11 +207,9 @@ ${cartDetails}
       locationAddress: selectedLocation.address,
       locationPhone: selectedLocation.phone,
       items: cart,
-      productSubtotal: Math.round(productSubtotal),
+      subtotal: Math.round(subtotal),
       iva: Math.round(iva),
-      subtotal: subtotal,
-      deliveryFee: deliveryFee,
-      total: total,
+      total: Math.round(total),
       paymentMethod: formData.paymentMethod,
       requiresInvoice: formData.requiresInvoice,
       date: new Date()
@@ -299,8 +285,8 @@ ${cartDetails}
 
   // Success confirmation screen
   if (orderSubmitted) {
-    const productSubtotal = subtotal * 0.92;
-    const iva = subtotal * 0.08;
+    const subtotal = total * 0.92;
+    const iva = total * 0.08;
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center p-4">
@@ -357,30 +343,22 @@ ${cartDetails}
               </span>
             </div>
 
-            {/* Desglose de costos con domicilio */}
+            {/* Desglose de costos corregido - solo IVA */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h4 className="font-bold text-blue-800 mb-3">💰 Desglose de Costos:</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-blue-700">Subtotal productos:</span>
-                  <span className="font-medium">${Math.round(productSubtotal).toLocaleString()}</span>
+                  <span className="text-blue-700">Subtotal:</span>
+                  <span className="font-medium">${Math.round(subtotal).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-blue-700">IVA (8%):</span>
                   <span className="font-medium">${Math.round(iva).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Subtotal:</span>
-                  <span className="font-medium">${subtotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Domicilio ({formData.neighborhood}):</span>
-                  <span className="font-medium">${deliveryFee.toLocaleString()}</span>
-                </div>
                 <div className="border-t border-blue-300 pt-2 mt-2">
                   <div className="flex justify-between font-bold text-base">
                     <span className="text-blue-800">TOTAL:</span>
-                    <span className="text-[#FF8C00]">${total.toLocaleString()}</span>
+                    <span className="text-[#FF8C00]">${Math.round(total).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -548,24 +526,6 @@ ${cartDetails}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
                     placeholder="Escribe el nombre de tu barrio"
                   />
-                  
-                  {/* Delivery fee indicator */}
-                  {formData.neighborhood.trim() && selectedLocation && (
-                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-blue-800">
-                          🚚 Costo de domicilio para {formData.neighborhood}:
-                        </span>
-                        <span className="font-bold text-blue-600">
-                          ${deliveryFee.toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="text-xs text-blue-700">
-                        📍 Entrega desde <span className="font-heavyrust-primary">{selectedLocation?.name}</span>
-                      </p>
-                    </div>
-                  )}
-                  
                   <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-xs text-blue-800 font-medium mb-1">
                       📍 Zonas de entrega para <span className="font-heavyrust-primary">{selectedLocation?.name}</span>:
@@ -580,6 +540,7 @@ ${cartDetails}
                         </span>
                       ))}
                     </div>
+
                   </div>
                 </div>
 

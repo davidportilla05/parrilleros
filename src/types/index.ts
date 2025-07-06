@@ -56,5 +56,4 @@ export interface Location {
   whatsapp: string;
   neighborhood: string;
   deliveryZones: string[];
-  deliveryFees: { [neighborhood: string]: number };
 }
