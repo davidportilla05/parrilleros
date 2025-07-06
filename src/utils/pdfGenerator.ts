@@ -13,8 +13,10 @@ interface InvoiceData {
   locationAddress: string;
   locationPhone: string;
   items: CartItem[];
-  subtotal: number;
+  productSubtotal: number;
   iva: number;
+  subtotal: number;
+  deliveryFee: number;
   total: number;
   paymentMethod: string;
   requiresInvoice: boolean;
@@ -133,17 +135,28 @@ export const generateInvoicePDF = (data: InvoiceData): void => {
   // Totals section
   yPosition = addCenteredText('RESUMEN DE COSTOS', yPosition + 2, 10, 'bold');
   
-  // Subtotal
+  // Product subtotal
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text('Subtotal:', leftMargin, yPosition + 3);
-  doc.text(`$${data.subtotal.toLocaleString()}`, rightMargin, yPosition + 3, { align: 'right' });
+  doc.text('Subtotal productos:', leftMargin, yPosition + 3);
+  doc.text(`$${data.productSubtotal.toLocaleString()}`, rightMargin, yPosition + 3, { align: 'right' });
   
   // IVA
   doc.text('IVA (8%):', leftMargin, yPosition + 6);
   doc.text(`$${data.iva.toLocaleString()}`, rightMargin, yPosition + 6, { align: 'right' });
   
-  yPosition = addSeparatorLine(yPosition + 8);
+  // Subtotal
+  doc.text('Subtotal:', leftMargin, yPosition + 9);
+  doc.text(`$${data.subtotal.toLocaleString()}`, rightMargin, yPosition + 9, { align: 'right' });
+  
+  // Delivery fee
+  if (data.deliveryFee > 0) {
+    doc.text(`Domicilio (${data.neighborhood}):`, leftMargin, yPosition + 12);
+    doc.text(`$${data.deliveryFee.toLocaleString()}`, rightMargin, yPosition + 12, { align: 'right' });
+    yPosition += 3;
+  }
+  
+  yPosition = addSeparatorLine(yPosition + 11);
   
   // Total
   doc.setFontSize(12);

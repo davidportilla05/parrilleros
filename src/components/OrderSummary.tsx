@@ -12,9 +12,10 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   showItems = true, 
   isReceipt = false 
 }) => {
-  const { cart, total, orderNumber, currentOrder } = useOrder();
+  const { cart, total, subtotal, deliveryFee, orderNumber, currentOrder } = useOrder();
   const items = isReceipt && currentOrder ? currentOrder.items : cart;
   const orderTotal = isReceipt && currentOrder ? currentOrder.total : total;
+  const orderSubtotal = isReceipt && currentOrder ? currentOrder.total - deliveryFee : subtotal;
 
   if (items.length === 0 && !isReceipt) {
     return (
@@ -29,8 +30,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   }
 
   // Cálculos de impuestos corregidos - solo IVA
-  const subtotal = orderTotal * 0.92; // Base gravable (92%)
-  const iva = orderTotal * 0.08; // IVA (8%)
+  const productSubtotal = orderSubtotal * 0.92; // Base gravable (92%)
+  const iva = orderSubtotal * 0.08; // IVA (8%)
 
   return (
     <div className={`${isReceipt ? 'text-sm' : 'bg-white rounded-lg shadow-md p-6'}`}>
@@ -50,13 +51,23 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
       <div className={`border-t border-gray-200 pt-3 ${isReceipt ? 'text-xs' : ''}`}>
         <div className="flex justify-between mb-1">
-          <span className="text-gray-600">Subtotal:</span>
-          <span className="font-medium">${Math.round(subtotal).toLocaleString()}</span>
+          <span className="text-gray-600">Subtotal productos:</span>
+          <span className="font-medium">${Math.round(productSubtotal).toLocaleString()}</span>
         </div>
         <div className="flex justify-between mb-1">
           <span className="text-gray-600">IVA (8%):</span>
           <span className="font-medium">${Math.round(iva).toLocaleString()}</span>
         </div>
+        <div className="flex justify-between mb-1">
+          <span className="text-gray-600">Subtotal:</span>
+          <span className="font-medium">${orderSubtotal.toLocaleString()}</span>
+        </div>
+        {deliveryFee > 0 && (
+          <div className="flex justify-between mb-1">
+            <span className="text-gray-600">Domicilio:</span>
+            <span className="font-medium">${deliveryFee.toLocaleString()}</span>
+          </div>
+        )}
         <div className={`flex justify-between font-bold mt-2 pt-2 border-t border-gray-200 ${isReceipt ? 'text-sm' : 'text-lg'}`}>
           <span>Total:</span>
           <span className="text-[#FF8C00]">${Math.round(orderTotal).toLocaleString()}</span>
